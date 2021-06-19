@@ -117,3 +117,7 @@ output/
 TextGrid/
 hifigan/*.pth.tar
 preprocessed_data/
+preprocessed_data/JSUT/TextGrid.zip
+preprocessed_data/LJSpeech/stats.json
+preprocessed_data/LJSpeech/train.txt
+preprocessed_data/LJSpeech/val.txt

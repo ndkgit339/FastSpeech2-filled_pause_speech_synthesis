@@ -90,9 +90,9 @@ def main(args, configs):
                 # Cal Losson
                 if use_jdit:
                     losses = Loss(batch, output[:-2])
-                    alignment = batch[-1]
+                    alignment = output[-1]
                     total_loss = losses[0]
-                    total_loss += nn.MSELoss()(output[-2],batch[6])
+                    total_loss += 0.1* nn.MSELoss()(output[-2],batch[6])
                 else:
                     losses = Loss(batch, output)
                     total_loss = losses[0]

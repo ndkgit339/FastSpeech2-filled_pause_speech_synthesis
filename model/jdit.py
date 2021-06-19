@@ -435,7 +435,7 @@ class Decoder(nn.Module):
         decoder_inputs = self.prenet(decoder_inputs)
 
         self.initialize_decoder_states(
-            memory, mask=~get_mask_from_lengths(memory_lengths))
+            memory, mask=get_mask_from_lengths(memory_lengths))
 
         mel_outputs, gate_outputs, alignments = [], [], []
         while len(mel_outputs) < decoder_inputs.size(0) - 1:
@@ -502,20 +502,20 @@ class JDIT(nn.Module):
 
 
     def forward(self, encoder_outputs, mels, text_lengths):
-
         mel_outputs, gate_outputs, alignments = self.decoder(
             encoder_outputs, mels.permute(0,2,1), memory_lengths=text_lengths)
     
         return mel_outputs.permute(0,2,1), gate_outputs, alignments
 
-    def attention2duration(self, alignments,encoder_outputs_size):
+    def attention2duration(self, alignments,max_encoder_len,mel_lengths):
         durations = []
-        for alignment in alignments:
-            D = np.array([0 for _ in range(encoder_outputs_size[i])])
-            for i in range(np.shape(alignment)[0]):
-                max_index = alignment[i].tolist().index(alignment[i].max())
-                D[max_index] = D[max_index] + self.time_scaler
-            assert D.sum() == alignment.shape[0]
+        for idx, alignment in enumerate(alignments.detach().cpu().numpy()):
+            D = np.array([0 for _ in range(max_encoder_len)])
+            counts = np.argmax(alignment[:mel_lengths[idx]],axis=1)
+            unique, counts = np.unique(counts, return_counts=True)
+            for u, c in zip(unique, counts):
+                D[unique] = counts
+            assert D.sum() == mel_lengths[idx]
             durations.append(torch.tensor(D))
         return torch.stack(durations)
 

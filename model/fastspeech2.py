@@ -68,8 +68,9 @@ class FastSpeech2(nn.Module):
         )
 
         output = self.encoder(texts, src_masks)
-        if self.use_jdit:
+        if self.use_jdit and self.training:
             mel_jdit, gate_outputs, alignments = self.jdit(output, mels, src_lens)
+            d_targets = self.jdit.attention2duration(alignments,max_src_len,mel_lens)
 
         if self.speaker_emb is not None:
             output = output + self.speaker_emb(speakers).unsqueeze(1).expand(
@@ -102,7 +103,7 @@ class FastSpeech2(nn.Module):
 
         postnet_output = self.postnet(output) + output
 
-        if self.use_jdit:
+        if self.use_jdit and self.training:
             return (
                 output,
                 postnet_output,
