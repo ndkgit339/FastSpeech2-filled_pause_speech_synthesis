@@ -20,6 +20,7 @@ class Dataset(Dataset):
         self.symbol_to_id = {s: i for i, s in enumerate(symbols)}
         self.use_accent = preprocess_config["preprocessing"]["accent"]["use_accent"]
         self.accent_to_id = {'0':0, '[':1, ']':2, '#':3}
+        self.language = preprocess_config["preprocessing"]["text"]["language"]
 
         self.basename, self.speaker, self.text, self.raw_text = self.process_meta(
             filename
@@ -37,7 +38,10 @@ class Dataset(Dataset):
         speaker = self.speaker[idx]
         speaker_id = self.speaker_map[speaker]
         raw_text = self.raw_text[idx]
-        phone = np.array([self.symbol_to_id[t] for t in self.text[idx].replace("{", "").replace("}", "").split()])
+        if self.language == "en":
+            phone = np.array(text_to_sequence(self.text[idx], self.cleaners))
+        else:
+            phone = np.array([self.symbol_to_id[t] for t in self.text[idx].replace("{", "").replace("}", "").split()])
         if self.use_accent:
             with open(os.path.join(self.preprocessed_path, "accent",basename+ '.accent')) as f:
                 accent = f.read()

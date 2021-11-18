@@ -82,7 +82,9 @@ class VarianceAdaptor(nn.Module):
         if target is not None:
             embedding = self.pitch_embedding(torch.bucketize(target, self.pitch_bins))
         else:
-            prediction = prediction * control
+            print(prediction)
+            prediction = prediction * torch.tensor([([1]*(len(prediction[0]) -8) + [3]*8)]).cuda()
+            print(prediction)
             embedding = self.pitch_embedding(
                 torch.bucketize(prediction, self.pitch_bins)
             )

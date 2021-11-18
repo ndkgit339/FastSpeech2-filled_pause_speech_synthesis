@@ -98,9 +98,14 @@ class Encoder(nn.Module):
                 )
 
         else:
-            enc_output = self.src_word_emb(src_seq) + self.src_accent_emb(accents) +self.position_enc[
-                :, :max_len, :
-            ].expand(batch_size, -1, -1)
+            if accents is not None:
+                enc_output = self.src_word_emb(src_seq) + self.src_accent_emb(accents) +self.position_enc[
+                    :, :max_len, :
+                ].expand(batch_size, -1, -1)
+            else:
+                enc_output = self.src_word_emb(src_seq) + self.position_enc[
+                    :, :max_len, :
+                ].expand(batch_size, -1, -1)
 
         for enc_layer in self.layer_stack:
             enc_output, enc_slf_attn = enc_layer(
