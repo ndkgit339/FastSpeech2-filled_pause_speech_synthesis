@@ -1,3 +1,51 @@
+# Speech synthesis with filled pauses and training scripts
+
+This is a source implementation of speech synthesis model with filled pauses. There are...
+
+## Requirements
+
+You can install the Python requirements with
+```
+pip install -r requirements.txt
+```
+Our recommendation of the Python version is ``3.8``.
+
+## Synthesize speech with filled pauses
+
+Coming soon...
+
+## Train a speech synthesis model
+
+### Step 1: Preparation
+The script ``.py`` ...
+```
+python xxx.py path/to/xxx path/to/xxx
+```
+
+### Step 2: Preprocess
+The script ``preprocess.py`` ... 
+This follows the setting written in ``conf/xxx.yaml``. Change the setting accordingly.
+```
+python preprocess.py
+```
+
+### Step 3: Training
+The script ``train.py`` train the xxx. This follows the setting written in ``conf/train/config.yaml``. Change the setting accordingly.
+```
+python train.py
+```
+
+## Contributors
+- [Yuta Matsunaga](https://sites.google.com/g.ecc.u-tokyo.ac.jp/yuta-matsunaga/home) (The University of Tokyo, Japan) [main contributor]
+- [Takaaki Saeki](https://takaaki-saeki.github.io/) (The University of Tokyo, Japan)
+- [Shinnosuke Takamichi](https://sites.google.com/site/shinnosuketakamichi/home) (The University of Tokyo, Japan)
+- [Hiroshi Saruwatari](https://researchmap.jp/read0102891/) (The University of Tokyo, Japan)
+
+## Citation
+```
+Coming soon...
+```
+
 # FastSpeech2 JSUT implementation (Scroll down for original readme)
 ## How To setup and start training
 ### Download JSUT
