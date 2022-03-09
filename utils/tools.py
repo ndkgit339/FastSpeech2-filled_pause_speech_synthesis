@@ -15,7 +15,7 @@ matplotlib.use("Agg")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-def to_device(data, device):
+def to_device(data, device, use_accent=False):
     if len(data) == 12:
         (
             ids,
@@ -55,7 +55,7 @@ def to_device(data, device):
             energies,
             durations,
         )
-    if len(data) == 13:
+    if len(data) == 13 and use_accent:
         (
             ids,
             raw_texts,
@@ -106,7 +106,7 @@ def to_device(data, device):
         src_lens = torch.from_numpy(src_lens).to(device)
 
         return (ids, raw_texts, speakers, texts, src_lens, max_src_len)
-    if len(data) == 7:
+    if len(data) == 7 and use_accent:
         (ids, raw_texts, speakers, texts, src_lens, max_src_len, accents) = data
 
         speakers = torch.from_numpy(speakers).long().to(device)

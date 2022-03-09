@@ -85,7 +85,7 @@ def main(args, configs):
         inner_bar = tqdm(total=len(loader), desc="Epoch {}".format(epoch), position=1)
         for batchs in loader:
             for batch in batchs:
-                batch = to_device(batch, device)
+                batch = to_device(batch, device, use_accent=use_accent)
 
                 # Forward
                 if use_accent:
@@ -138,6 +138,11 @@ def main(args, configs):
                             step, 
                             dataformats='HWC'
                         )
+                    with torch.no_grad():
+                        if use_accent:
+                            output = model(*(batch[2:-6]), accents=accents)
+                        else:
+                            output = model(*(batch[2:-6]))
                     fig, wav_reconstruction, wav_prediction, tag = synth_one_sample(
                         batch,
                         output,
