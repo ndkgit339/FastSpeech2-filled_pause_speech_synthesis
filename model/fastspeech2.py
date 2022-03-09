@@ -47,23 +47,11 @@ class FastSpeech2(nn.Module):
                 model_config["transformer"]["encoder_hidden"],
             )
 
-    def forward(
-        self,
-        speakers,
-        texts,
-        src_lens,
-        max_src_len,
-        mels=None,
-        mel_lens=None,
-        max_mel_len=None,
-        p_targets=None,
-        e_targets=None,
-        d_targets=None,
-        p_control=1.0,
-        e_control=1.0,
-        d_control=1.0,
-        accents=None,
-    ):
+    def forward(self, speakers, texts, src_lens, max_src_len, mels=None,
+                mel_lens=None, max_mel_len=None, p_targets=None,
+                e_targets=None, d_targets=None, p_control=1.0,
+                e_control=1.0, d_control=1.0, accents=None, fp_tag=None):
+
         src_masks = get_mask_from_lengths(src_lens, max_src_len)
         mel_masks = (
             get_mask_from_lengths(mel_lens, max_mel_len)
@@ -71,7 +59,10 @@ class FastSpeech2(nn.Module):
             else None
         )
 
-        output = self.encoder(texts, src_masks,accents=accents)
+        if self.model_config["use_fp_tag"]:
+            output = self.encoder(texts, src_masks, accents=accents, fp_tag=fp_tag)
+        else:
+            output = self.encoder(texts, src_masks,accents=accents)
         if self.use_jdit:
             mel_jdit, gate_outputs, alignments = self.jdit(output, mels, src_lens)
 

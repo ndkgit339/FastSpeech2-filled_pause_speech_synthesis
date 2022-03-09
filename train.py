@@ -24,6 +24,9 @@ def main(args, configs):
 
     preprocess_config, model_config, train_config = configs
 
+    # Use FP tag
+    use_fp_tag = train_config["use_fp_tag"]
+
     # use accent info?
     use_accent = preprocess_config['preprocessing']["accent"]["use_accent"]
 
@@ -85,15 +88,27 @@ def main(args, configs):
         inner_bar = tqdm(total=len(loader), desc="Epoch {}".format(epoch), position=1)
         for batchs in loader:
             for batch in batchs:
-                batch = to_device(batch, device, use_accent=use_accent)
+                batch = to_device(batch, device, use_accent=use_accent,
+                                  use_fp_tag=use_fp_tag)
 
                 # Forward
-                if use_accent:
-                    accents = batch[-1]
-                    batch = batch[:-1]
-                    output = model(*(batch[2:]),accents=accents)
+                if use_fp_tag:
+                    if use_accent:
+                        accents = batch[-2]
+                        fp_tag = batch[-1]
+                        batch = batch[:-2]
+                        output = model(*(batch[2:]), accents=accents, fp_tag=fp_tag)
+                    else:
+                        fp_tag = batch[-1]
+                        batch = batch[:-1]
+                        output = model(*(batch[2:]), fp_tag=fp_tag)   
                 else:
-                    output = model(*(batch[2:]))
+                    if use_accent:
+                        accents = batch[-1]
+                        batch = batch[:-1]
+                        output = model(*(batch[2:]),accents=accents)
+                    else:
+                        output = model(*(batch[2:]))
 
 
                 # Cal Losson
@@ -139,10 +154,16 @@ def main(args, configs):
                             dataformats='HWC'
                         )
                     with torch.no_grad():
-                        if use_accent:
-                            output = model(*(batch[2:-6]), accents=accents)
+                        if use_fp_tag:
+                            if use_accent:
+                                output = model(*(batch[2:-6]), accents=accents, filler_tag=fp_tag)
+                            else:
+                                output = model(*(batch[2:-6]), filler_tag=fp_tag)   
                         else:
-                            output = model(*(batch[2:-6]))
+                            if use_accent:
+                                output = model(*(batch[2:-6]), accents=accents)
+                            else:
+                                output = model(*(batch[2:-6]))
                     fig, wav_reconstruction, wav_prediction, tag = synth_one_sample(
                         batch,
                         output,

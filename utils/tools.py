@@ -15,7 +15,7 @@ matplotlib.use("Agg")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-def to_device(data, device, use_accent=False):
+def to_device(data, device, use_accent=False, use_fp_tag=False):
     if len(data) == 12:
         (
             ids,
@@ -98,6 +98,95 @@ def to_device(data, device, use_accent=False):
             accents
         )
 
+    if len(data) == 13 and use_fp_tag:
+        (
+            ids,
+            raw_texts,
+            speakers,
+            texts,
+            src_lens,
+            max_src_len,
+            mels,
+            mel_lens,
+            max_mel_len,
+            pitches,
+            energies,
+            durations,
+            filler_tag,
+        ) = data
+
+        speakers = torch.from_numpy(speakers).long().to(device)
+        texts = torch.from_numpy(texts).long().to(device)
+        src_lens = torch.from_numpy(src_lens).to(device)
+        mels = torch.from_numpy(mels).float().to(device)
+        mel_lens = torch.from_numpy(mel_lens).to(device)
+        pitches = torch.from_numpy(pitches).float().to(device)
+        energies = torch.from_numpy(energies).to(device)
+        durations = torch.from_numpy(durations).long().to(device)
+        filler_tag = torch.from_numpy(filler_tag).long().to(device)
+
+        return (
+            ids,
+            raw_texts,
+            speakers,
+            texts,
+            src_lens,
+            max_src_len,
+            mels,
+            mel_lens,
+            max_mel_len,
+            pitches,
+            energies,
+            durations,
+            filler_tag,
+        )
+
+    if len(data) == 14:
+        (
+            ids,
+            raw_texts,
+            speakers,
+            texts,
+            src_lens,
+            max_src_len,
+            mels,
+            mel_lens,
+            max_mel_len,
+            pitches,
+            energies,
+            durations,
+            accents,
+            filler_tag,
+        ) = data
+
+        speakers = torch.from_numpy(speakers).long().to(device)
+        texts = torch.from_numpy(texts).long().to(device)
+        src_lens = torch.from_numpy(src_lens).to(device)
+        mels = torch.from_numpy(mels).float().to(device)
+        mel_lens = torch.from_numpy(mel_lens).to(device)
+        pitches = torch.from_numpy(pitches).float().to(device)
+        energies = torch.from_numpy(energies).to(device)
+        durations = torch.from_numpy(durations).long().to(device)
+        accents = torch.from_numpy(accents).long().to(device)
+        filler_tag = torch.from_numpy(filler_tag).long().to(device)
+
+        return (
+            ids,
+            raw_texts,
+            speakers,
+            texts,
+            src_lens,
+            max_src_len,
+            mels,
+            mel_lens,
+            max_mel_len,
+            pitches,
+            energies,
+            durations,
+            accents,
+            filler_tag,
+        )
+
     if len(data) == 6:
         (ids, raw_texts, speakers, texts, src_lens, max_src_len) = data
 
@@ -116,6 +205,27 @@ def to_device(data, device, use_accent=False):
 
         return (ids, raw_texts, speakers, texts, src_lens, max_src_len, accents)
 
+    if len(data) == 7 and use_fp_tag:
+        (ids, raw_texts, speakers, texts, src_lens, max_src_len, filler_tags) = data
+
+        speakers = torch.from_numpy(speakers).long().to(device)
+        texts = torch.from_numpy(texts).long().to(device)
+        src_lens = torch.from_numpy(src_lens).to(device)
+        filler_tags = torch.from_numpy(filler_tags).long().to(device)
+
+        return (ids, raw_texts, speakers, texts, src_lens, max_src_len, filler_tags)
+
+    if len(data) == 8:
+        (ids, raw_texts, speakers, texts, src_lens, max_src_len, accents, filler_tags) = data
+
+        speakers = torch.from_numpy(speakers).long().to(device)
+        texts = torch.from_numpy(texts).long().to(device)
+        src_lens = torch.from_numpy(src_lens).to(device)
+        accents = torch.from_numpy(accents).long().to(device)
+        filler_tags = torch.from_numpy(filler_tags).long().to(device)
+
+        return (ids, raw_texts, speakers, texts, src_lens, max_src_len, accents, filler_tags)
+  
 
 def log(
     logger, step=None, losses=None, fig=None, audio=None, sampling_rate=22050, tag=""

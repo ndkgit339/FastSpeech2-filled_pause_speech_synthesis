@@ -50,6 +50,8 @@ class Preprocessor:
             config["preprocessing"]["mel"]["mel_fmax"],
         )
 
+        self.use_fp_tag = config["preprocessing"]["use_fp_tag"]
+
     def build_from_path(self):
         os.makedirs((os.path.join(self.out_dir, "mel")), exist_ok=True)
         os.makedirs((os.path.join(self.out_dir, "pitch")), exist_ok=True)
@@ -180,6 +182,16 @@ class Preprocessor:
         with open(text_path, "r") as f:
             raw_text = f.readline().strip("\n")
 
+        # Read fp tag
+        if self.use_fp_tag:
+            fp_tag_path = os.path.join(self.out_dir, "fp_tag", speaker,
+                                       "{}.ftag".format(basename))
+            with open(fp_tag_path, "r") as f:
+                fp_tag = f.readline().strip("\n")
+
+            # Check length of phones and tags
+            assert len(phone) == len(fp_tag.split(" "))
+
         # Compute fundamental frequency
         pitch, t = pw.dio(
             wav.astype(np.float64),
@@ -245,12 +257,20 @@ class Preprocessor:
             mel_spectrogram.T,
         )
 
-        return (
-            "|".join([basename, speaker, text, raw_text]),
-            self.remove_outlier(pitch),
-            self.remove_outlier(energy),
-            mel_spectrogram.shape[1],
-        )
+        if self.use_fp_tag:
+            return (
+                "|".join([basename, speaker, text, raw_text, fp_tag]),
+                self.remove_outlier(pitch),
+                self.remove_outlier(energy),
+                mel_spectrogram.shape[1],
+            )
+        else:
+            return (
+                "|".join([basename, speaker, text, raw_text]),
+                self.remove_outlier(pitch),
+                self.remove_outlier(energy),
+                mel_spectrogram.shape[1],
+            )
 
     def get_alignment(self, tier):
         sil_phones = ["sil", "sp", "spn", 'silB', 'silE', '']

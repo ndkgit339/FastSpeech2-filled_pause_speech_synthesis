@@ -21,9 +21,16 @@ class Dataset(Dataset):
         self.use_accent = preprocess_config["preprocessing"]["accent"]["use_accent"]
         self.accent_to_id = {'0':0, '[':1, ']':2, '#':3}
 
-        self.basename, self.speaker, self.text, self.raw_text = self.process_meta(
-            filename
-        )
+        # Use fp tag
+        self.preprocess_use_fp_tag = preprocess_config["preprocessing"]["use_fp_tag"]
+        self.train_use_fp_tag = train_config["use_fp_tag"]
+        if self.train_use_fp_tag:
+            self.basename, self.speaker, self.text, self.raw_text, self.fp_tag = \
+                self.process_meta(filename)
+        else:
+            self.basename, self.speaker, self.text, self.raw_text = self.process_meta(
+                filename)
+
         with open(os.path.join(self.preprocessed_path, "speakers.json")) as f:
             self.speaker_map = json.load(f)
         self.sort = sort
@@ -82,6 +89,11 @@ class Dataset(Dataset):
         if self.use_accent:
             sample["accent"] = accent
 
+        if self.train_use_fp_tag:
+            fp_tag = np.array(
+                [int(f) for f in self.fp_tag[idx].split(" ")])
+            sample["fp_tag"] = fp_tag
+
         return sample
 
     def process_meta(self, filename):
@@ -92,13 +104,25 @@ class Dataset(Dataset):
             speaker = []
             text = []
             raw_text = []
+            fp_tag = []
             for line in f.readlines():
-                n, s, t, r = line.strip("\n").split("|")
-                name.append(n)
-                speaker.append(s)
-                text.append(t)
-                raw_text.append(r)
-            return name, speaker, text, raw_text
+                if self.preprocess_use_fp_tag:
+                    n, s, t, r, f = line.strip("\n").split("|")
+                    name.append(n)
+                    speaker.append(s)
+                    text.append(t)
+                    raw_text.append(r)
+                    fp_tag.append(f)
+                else:
+                    n, s, t, r = line.strip("\n").split("|")
+                    name.append(n)
+                    speaker.append(s)
+                    text.append(t)
+                    raw_text.append(r)
+            if self.train_use_fp_tag:
+                return name, speaker, text, raw_text, fp_tag
+            else:
+                return name, speaker, text, raw_text
 
     def reprocess(self, data, idxs):
         ids = [data[idx]["id"] for idx in idxs]
@@ -122,38 +146,76 @@ class Dataset(Dataset):
         energies = pad_1D(energies)
         durations = pad_1D(durations)
         
-        if self.use_accent:
-            accents = pad_1D(accents)
-            return (
-                ids,
-                raw_texts,
-                speakers,
-                texts,
-                text_lens,
-                max(text_lens),
-                mels,
-                mel_lens,
-                max(mel_lens),
-                pitches,
-                energies,
-                durations,
-                accents
-            )
+        if self.train_use_fp_tag:
+            fp_tags = pad_1D([data[idx]["fp_tag"] for idx in idxs])
+            fp_tags = np.expand_dims(fp_tags, axis=2)
+            if self.use_accent:
+                accents = pad_1D(accents)
+                return (
+                    ids,
+                    raw_texts,
+                    speakers,
+                    texts,
+                    text_lens,
+                    max(text_lens),
+                    mels,
+                    mel_lens,
+                    max(mel_lens),
+                    pitches,
+                    energies,
+                    durations,
+                    accents,
+                    fp_tags
+                )
+            else:
+                return (
+                    ids,
+                    raw_texts,
+                    speakers,
+                    texts,
+                    text_lens,
+                    max(text_lens),
+                    mels,
+                    mel_lens,
+                    max(mel_lens),
+                    pitches,
+                    energies,
+                    durations,
+                    fp_tags
+                )
         else:
-            return (
-                ids,
-                raw_texts,
-                speakers,
-                texts,
-                text_lens,
-                max(text_lens),
-                mels,
-                mel_lens,
-                max(mel_lens),
-                pitches,
-                energies,
-                durations
-            )
+            if self.use_accent:
+                accents = pad_1D(accents)
+                return (
+                    ids,
+                    raw_texts,
+                    speakers,
+                    texts,
+                    text_lens,
+                    max(text_lens),
+                    mels,
+                    mel_lens,
+                    max(mel_lens),
+                    pitches,
+                    energies,
+                    durations,
+                    accents
+                )
+            else:
+                return (
+                    ids,
+                    raw_texts,
+                    speakers,
+                    texts,
+                    text_lens,
+                    max(text_lens),
+                    mels,
+                    mel_lens,
+                    max(mel_lens),
+                    pitches,
+                    energies,
+                    durations
+                )
 
 
     def collate_fn(self, data):
@@ -182,9 +244,17 @@ class TextDataset(Dataset):
     def __init__(self, filepath, preprocess_config):
         self.cleaners = preprocess_config["preprocessing"]["text"]["text_cleaners"]
 
-        self.basename, self.speaker, self.text, self.raw_text = self.process_meta(
-            filepath
-        )
+        self.preprocessed_path = preprocess_config["path"]["preprocessed_path"]
+        self.symbol_to_id = {s: i for i, s in enumerate(symbols)}
+        self.preprocess_use_fp_tag = preprocess_config["preprocessing"]["use_fp_tag"]
+        self.train_use_fp_tag = train_config["use_fp_tag"]        
+        if self.train_use_fp_tag:
+            self.basename, self.speaker, self.text, self.raw_text, self.fp_tag = \
+                self.process_meta(filepath)
+        else:
+            self.basename, self.speaker, self.text, self.raw_text = \
+                self.process_meta(filepath)
+
         with open(
             os.path.join(
                 preprocess_config["path"]["preprocessed_path"], "speakers.json"
@@ -211,7 +281,14 @@ class TextDataset(Dataset):
             accent = [self.accent_to_id[t] for t in accent]
             accent = np.array(accent[:len(phone)])
 
-        return (basename, speaker_id, phone, raw_text,accent)
+        if self.train_use_fp_tag:
+            fp_tag = np.array([int(f) for f in self.fp_tag[idx].split(" ")])
+            assert len(phone) == len(fp_tag), \
+                "phone length:{}, ftag length:{}, should be equal".format(
+                    len(phone), len(fp_tag))
+            return (basename, speaker_id, phone, raw_text, accent, fp_tag)
+        else:
+            return (basename, speaker_id, phone, raw_text, accent)
 
     def process_meta(self, filename):
         with open(filename, "r", encoding="utf-8") as f:
@@ -219,13 +296,26 @@ class TextDataset(Dataset):
             speaker = []
             text = []
             raw_text = []
+            fp_tag = []
             for line in f.readlines():
-                n, s, t, r = line.strip("\n").split("|")
-                name.append(n)
-                speaker.append(s)
-                text.append(t)
-                raw_text.append(r)
-            return name, speaker, text, raw_text
+                if self.preprocess_use_fp_tag:
+                    n, s, t, r, f = line.strip("\n").split("|")
+                    name.append(n)
+                    speaker.append(s)
+                    text.append(t)
+                    raw_text.append(r)
+                    fp_tag.append(f)
+                    assert len(t.split(" ")) == len(f.split(" "))
+                else:
+                    n, s, t, r = line.strip("\n").split("|")
+                    name.append(n)
+                    speaker.append(s)
+                    text.append(t)
+                    raw_text.append(r)
+            if self.train_use_fp_tag:
+                return name, speaker, text, raw_text, fp_tag
+            else:
+                return name, speaker, text, raw_text
 
     def collate_fn(self, data):
         ids = [d[0] for d in data]
@@ -234,12 +324,22 @@ class TextDataset(Dataset):
         raw_texts = [d[3] for d in data]
         text_lens = np.array([text.shape[0] for text in texts])
         if self.use_accent:
-            accents = [d[4] for d in data]
+            accents = pad_1D([d[4] for d in data])
 
         texts = pad_1D(texts)
-        accents = pad_1D(accents)
 
-        return ids, raw_texts, speakers, texts, text_lens, max(text_lens), accents
+        if self.train_use_fp_tag:
+            fp_tags = pad_1D([d[5] for d in data])
+            fp_tags = np.expand_dims(fp_tags, axis=2)
+            if self.use_accent:
+                return ids, raw_texts, speakers, texts, text_lens, max(text_lens), accents, fp_tags
+            else:
+                return ids, raw_texts, speakers, texts, text_lens, max(text_lens), fp_tags
+        else:
+            if self.use_accent:
+                return ids, raw_texts, speakers, texts, text_lens, max(text_lens), accents
+            else:
+                return ids, raw_texts, speakers, texts, text_lens, max(text_lens), accents
 
 
 if __name__ == "__main__":
