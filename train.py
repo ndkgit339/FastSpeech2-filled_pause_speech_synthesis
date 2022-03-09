@@ -24,6 +24,9 @@ def main(args, configs):
 
     preprocess_config, model_config, train_config = configs
 
+    # Fine tuning
+    fine_tune = train_config["fine_tune"]
+
     # Use FP tag
     use_fp_tag = train_config["use_fp_tag"]
 
@@ -47,7 +50,7 @@ def main(args, configs):
     )
 
     # Prepare model
-    model, optimizer = get_model(args, configs, device, train=True)
+    model, optimizer = get_model(args, configs, device, train=True, fine_tune=fine_tune)
     if train_config['dataparallel']:
         model = nn.DataParallel(model)
     num_param = get_param_num(model)
