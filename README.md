@@ -11,14 +11,29 @@ pip install -r requirements.txt
 Our recommendation of the Python version is ``3.8``.
 
 ## Synthesize speech with filled pauses
+This consists of two processes: prediction and synthesis.
 
-Coming soon...
+### Step 1: Prediction
+1. First, preprocess data for prediction. This follows the setting written in ``conf/train/config.yaml``.
+```
+python preprocess_prediction.py
+```
+2. Run the script for prediction. This follows the setting written in ``conf/train/config.yaml``.
+```
+python predict_fp.py
+```
+### Step 2: Synthesis
+
+
 
 ## Train a speech synthesis model
 
 ### Step 1: Preparation
+
 1. First, put files of phoneme labels, accents, and filled pause tags into the directory of preprocessed data ``preprocessed_data``, and put files of raw texts and waves into the directory of raw data ``raw_data``. You can see an example with the required formats thre.
+   
 2. Generate TextGrid files following an open-sourced script, [TextGridConverter](https://github.com/Syuparn/TextGridConverter).
+   
 3. The required directory structure is as follows:
 ```
 |--- preprocessed_dir
@@ -29,7 +44,7 @@ Coming soon...
 |    |         └--- xxx.ftag
 |    |--- TextGrid
 |    |    └--- speaker_name
-|    |         └--- xxx.ftag
+|    |         └--- xxx.TextGrid
 
 
 |--- raw_dir
@@ -48,8 +63,11 @@ python preprocess.py
 ### Step 3: Training
 The script ``train.py`` train the xxx. This follows the setting written in ``conf/train/config.yaml``. Change the setting accordingly.
 ```
-
 python train.py
+```
+You can select whether you use FP tag or not in ``conf/train/config.yaml``.
+```
+use_fp_tag: True or False
 ```
 
 ## References
