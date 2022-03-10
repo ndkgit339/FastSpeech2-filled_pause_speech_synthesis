@@ -17,12 +17,26 @@ Coming soon...
 ## Train a speech synthesis model
 
 ### Step 1: Preparation
-1. First, put files of phoneme labels, accents, and filled pause tags into the directory of preprocessed data ``./preprocessed_data``, and put files of raw texts and waves into the directory of raw data ``./raw_data``. If you want to know the required formats, please look at the example there.
-2. Convert phoneme labels to useful ones.
+1. First, put files of phoneme labels, accents, and filled pause tags into the directory of preprocessed data ``preprocessed_data``, and put files of raw texts and waves into the directory of raw data ``raw_data``. You can see an example with the required formats thre.
+2. Generate TextGrid files following an open-sourced script, [TextGridConverter](https://github.com/Syuparn/TextGridConverter).
+3. The required directory structure is as follows:
 ```
-python convert_lab_useful.py path/to/phoneme/labels/dir
+|--- preprocessed_dir
+|    |--- accent
+|    |    └--- xxx.accent
+|    |--- fp_tag
+|    |    └--- speaker_name
+|    |         └--- xxx.ftag
+|    |--- TextGrid
+|    |    └--- speaker_name
+|    |         └--- xxx.ftag
+
+
+|--- raw_dir
+|    └--- speaker_name
+|         |--- xxx.wav
+|         └--- xxx.lab
 ```
-3. Generate TextGrid files following an open-sourced script, [TextGridConverter](https://github.com/Syuparn/TextGridConverter).
 
 ### Step 2: Preprocess
 The script ``preprocess.py`` ... 
