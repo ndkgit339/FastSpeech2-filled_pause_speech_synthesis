@@ -10,15 +10,21 @@ pip install -r requirements.txt
 ```
 Our recommendation of the Python version is ``3.8``.
 
+## Preparation
+
+### BERT
+Install BERT model to the directory ``bert/`` from [here](https://nlp.ist.i.kyoto-u.ac.jp/?ku_bert_japanese). We use pytorch-pretrained-BERT with LARGE WWM version.
+
+
 ## Synthesize speech with filled pauses
 This consists of two processes: prediction and synthesis.
 
 ### Step 1: Prediction
-1. First, preprocess data for prediction. This follows the setting written in ``conf/train/config.yaml``.
+1. First, preprocess data for prediction. This follows the setting written in ``config_predict/preprocess.yaml``.
 ```
-python preprocess_prediction.py
+python preprocess_predict.py
 ```
-2. Run the script for prediction. This follows the setting written in ``conf/train/config.yaml``.
+2. Run the script for prediction. This follows the setting written in ``config_predict/predict.yaml``.
 ```
 python predict_fp.py
 ```
