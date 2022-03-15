@@ -36,6 +36,8 @@ class Encoder(nn.Module):
     def __init__(self, config):
         super(Encoder, self).__init__()
 
+        self.use_fp_tag = config["use_fp_tag"]
+
         n_position = config["max_seq_len"] + 1
         n_src_vocab = len(symbols) + 1
         d_word_vec = config["transformer"]["encoder_hidden"]
@@ -57,6 +59,12 @@ class Encoder(nn.Module):
             n_src_vocab, d_word_vec, padding_idx=Constants.PAD
         )
 
+        if self.use_fp_tag:
+            tag_dim = config["transformer"]["tag_dim"]
+            self.word_emb_with_tag = nn.Linear(
+                d_word_vec + tag_dim, d_word_vec
+            )
+
         self.src_accent_emb = nn.Embedding(
             4, d_word_vec, padding_idx=Constants.PAD
         )
@@ -74,7 +82,7 @@ class Encoder(nn.Module):
             ]
         )
 
-    def forward(self, src_seq, mask,accents=None, return_attns=False):
+    def forward(self, src_seq, mask,accents=None, fp_tag=None, return_attns=False):
 
         enc_slf_attn_list = []
         batch_size, max_len = src_seq.shape[0], src_seq.shape[1]
@@ -84,23 +92,76 @@ class Encoder(nn.Module):
 
         # -- Forward
         if not self.training and src_seq.shape[1] > self.max_seq_len:
-            if accents is not None:
-                enc_output = self.src_word_emb(src_seq) + self.src_accent_emb(accents) + get_sinusoid_encoding_table(
-                src_seq.shape[1], self.d_model
-                )[: src_seq.shape[1], :].unsqueeze(0).expand(batch_size, -1, -1).to(
-                    src_seq.device
-                )
+            if self.use_fp_tag:
+                if accents is not None:
+                    src_seq = self.word_emb_with_tag(
+                        torch.cat([
+                            self.src_word_emb(src_seq),
+                            fp_tag
+                        ], dim=2)
+                    )
+                    enc_output = src_seq + self.src_accent_emb(accents) + get_sinusoid_encoding_table(
+                        src_seq.shape[1], self.d_model
+                    )[: src_seq.shape[1], :].unsqueeze(0).expand(batch_size, -1, -1).to(
+                        src_seq.device
+                    )
+                else:
+                    src_seq = self.word_emb_with_tag(
+                        torch.cat([
+                            self.src_word_emb(src_seq),
+                            fp_tag
+                        ], dim=2)
+                    )
+                    enc_output = src_seq + get_sinusoid_encoding_table(
+                        src_seq.shape[1], self.d_model
+                    )[: src_seq.shape[1], :].unsqueeze(0).expand(batch_size, -1, -1).to(
+                        src_seq.device
+                    )
             else:
-                enc_output = self.src_word_emb(src_seq) + get_sinusoid_encoding_table(
-                src_seq.shape[1], self.d_model
-                )[: src_seq.shape[1], :].unsqueeze(0).expand(batch_size, -1, -1).to(
-                    src_seq.device
-                )
+                if accents is not None:
+                    enc_output = self.src_word_emb(src_seq) + self.src_accent_emb(accents) + get_sinusoid_encoding_table(
+                    src_seq.shape[1], self.d_model
+                    )[: src_seq.shape[1], :].unsqueeze(0).expand(batch_size, -1, -1).to(
+                        src_seq.device
+                    )
+                else:
+                    enc_output = self.src_word_emb(src_seq) + get_sinusoid_encoding_table(
+                    src_seq.shape[1], self.d_model
+                    )[: src_seq.shape[1], :].unsqueeze(0).expand(batch_size, -1, -1).to(
+                        src_seq.device
+                    )
 
         else:
-            enc_output = self.src_word_emb(src_seq) + self.src_accent_emb(accents) +self.position_enc[
-                :, :max_len, :
-            ].expand(batch_size, -1, -1)
+            if self.use_fp_tag:
+                if accents is not None:
+                    src_seq = self.word_emb_with_tag(
+                        torch.cat([
+                            self.src_word_emb(src_seq),
+                            fp_tag
+                        ], dim=2)
+                    )
+                    enc_output = src_seq + self.src_accent_emb(accents) + self.position_enc[
+                        :, :max_len, :
+                    ].expand(batch_size, -1, -1)
+                else:
+                    src_seq = self.word_emb_with_tag(
+                        torch.cat([
+                            self.src_word_emb(src_seq),
+                            fp_tag
+                        ], dim=2)
+                    )
+                    enc_output = src_seq + self.position_enc[
+                        :, :max_len, :
+                    ].expand(batch_size, -1, -1)
+            else:
+                if accents is not None:
+                    enc_output = self.src_word_emb(src_seq) + self.src_accent_emb(accents) + self.position_enc[
+                        :, :max_len, :
+                    ].expand(batch_size, -1, -1)
+                else:
+                    enc_output = self.src_word_emb(src_seq) + self.position_enc[
+                        :, :max_len, :
+                    ].expand(batch_size, -1, -1)
 
         for enc_layer in self.layer_stack:
             enc_output, enc_slf_attn = enc_layer(
