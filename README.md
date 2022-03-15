@@ -1,7 +1,7 @@
 # Speech synthesis with filled pauses and training scripts
 
 This is an open-source implementation of speech synthesis model with filled pauses based on FastSpeech2. The key charasteristics are as follows:
-- __Synthesize speech with filled pauses__ a script that synthesizes spontaneous speech with filled pauses from an input text without filled pauses by using prepared models of filled pause prediction and speech synthesis.
+- __Speech synthesis with filled pauses__ is a script that synthesizes spontaneous speech with filled pauses from an input text without filled pauses by using prepared models of filled pause prediction and speech synthesis.
 - __Filled pause tags__ are introduced to the speech synthesis model to synthesize natural spontaneous speech with filled pauses.
 
 ## Requirements
@@ -20,7 +20,7 @@ Our recommendation of the Python version is ``3.8``.
 
 Install BERT model to the directory ``./bert/`` from [here](https://nlp.ist.i.kyoto-u.ac.jp/?ku_bert_japanese). We use pytorch-pretrained-BERT with LARGE WWM version.
 
-## Synthesize speech with filled pauses
+## Speech synthesis with filled pauses
 
 This consists of two processes: filled pause prediction and speech synthesis.
 
