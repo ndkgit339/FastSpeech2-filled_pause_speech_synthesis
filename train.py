@@ -50,7 +50,7 @@ def main(args, configs):
     )
 
     # Prepare model
-    model, optimizer = get_model(args, configs, device, train=True, fine_tune=fine_tune)
+    model, optimizer = get_model(args.restore_step, configs, device, train=True, fine_tune=fine_tune)
     if train_config['dataparallel']:
         model = nn.DataParallel(model)
     num_param = get_param_num(model)
@@ -159,9 +159,9 @@ def main(args, configs):
                     with torch.no_grad():
                         if use_fp_tag:
                             if use_accent:
-                                output = model(*(batch[2:-6]), accents=accents, filler_tag=fp_tag)
+                                output = model(*(batch[2:-6]), accents=accents, fp_tag=fp_tag)
                             else:
-                                output = model(*(batch[2:-6]), filler_tag=fp_tag)   
+                                output = model(*(batch[2:-6]), fp_tag=fp_tag)   
                         else:
                             if use_accent:
                                 output = model(*(batch[2:-6]), accents=accents)
