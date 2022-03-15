@@ -1,8 +1,8 @@
 # Speech synthesis with filled pauses and training scripts
 
 This is an open-source implementation of speech synthesis model with filled pauses based on FastSpeech2. The key charasteristics are as follows:
-- _Synthesize speech with filled pauses_ a script that synthesizes spontaneous speech with filled pauses from an input text without filled pauses by using prepared models of filled pause prediction and speech synthesis.
-- _Filled pause tags_ are introduced to the speech synthesis model to synthesize natural spontaneous speech with filled pauses.
+- __Synthesize speech with filled pauses__ a script that synthesizes spontaneous speech with filled pauses from an input text without filled pauses by using prepared models of filled pause prediction and speech synthesis.
+- __Filled pause tags__ are introduced to the speech synthesis model to synthesize natural spontaneous speech with filled pauses.
 
 ## Requirements
 
