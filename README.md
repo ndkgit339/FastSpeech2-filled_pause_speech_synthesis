@@ -5,31 +5,44 @@ This is a source implementation of speech synthesis model with filled pauses. Th
 ## Requirements
 
 You can install the Python requirements with
+
 ```
 pip install -r requirements.txt
 ```
+
 Our recommendation of the Python version is ``3.8``.
 
 ## Preparation
 
 ### BERT
+
 Install BERT model to the directory ``./bert/`` from [here](https://nlp.ist.i.kyoto-u.ac.jp/?ku_bert_japanese). We use pytorch-pretrained-BERT with LARGE WWM version.
 
-
 ## Synthesize speech with filled pauses
-This consists of two processes: prediction and synthesis.
+
+This consists of two processes: filled pause prediction and speech synthesis.
+
+### Step 0: Preparation
+
+First of all, prepare filled pause prediction model and speech synthesis model. You can train a prediction model in [filledpause_prediction_group](https://github.com/ndkgit339/filledpause_prediction_group) and a speech synthesis model by using the script described below. Put the prediction model in ``./xxx`` and the speech synthesis model in ``./xxx``. You can see examples there.
 
 ### Step 1: Prediction
+
 1. First, prepare a file of the utterance list. You can see an example of that in ``./predict_preprocessed_data/example``.
 2. Next, run the script of preprocess for filled pause prediction. This follows the setting written in ``./config_predict/preprocess.yaml``. Change the setting accordingly.
+
 ```
 python predict_preprocess.py
 ```
-2. Next, run the script of filled pause prediction. This follows the setting written in ``./config_predict/predict.yaml``. Change the setting accordingly.
+
+3. Next, run the script of filled pause prediction. This follows the setting written in ``./config_predict/predict.yaml``. Change the setting accordingly.
+
 ```
 python predict_fp.py
 ```
-3. Finally, run the script of postprocess as the preparation for the next synthesis step. This follows the setting written in ``./config_predict/postprocess.yaml``. Change the setting accordingly.
+
+4. Finally, run the script of postprocess as the preparation for the next synthesis step. This follows the setting written in ``./config_predict/postprocess.yaml``. Change the setting accordingly.
+
 ```
 python predict_postprocess.py
 ```
