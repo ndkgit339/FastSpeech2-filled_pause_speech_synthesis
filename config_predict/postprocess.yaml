@@ -1,0 +1,11 @@
+hydra:
+  run:
+    dir: .
+
+n_jobs: 8
+
+data_dir: ./predicted_data/example
+
+target_preprocessed_dir: ./preprocessed_data/example
+target_raw_dir: ./raw_data/example
+speaker_name: example

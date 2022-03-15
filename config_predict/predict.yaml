@@ -2,16 +2,18 @@ hydra:
   run:
     dir: .
 
+defaults:
+  - _self_
+  - model: bilstm_bert
+
 random_seed: 42
 data:
   batch_size: 32
   num_workers: 12
-  data_dir: test_data/utokyo_naist_lecture/speaker1_uno/ver220211
-  filler_list: corpus/CSJ/filler_list.txt
+  data_dir: ./preprocessed_data_predict/example
+  filler_list: ./fp.list
 eval:
-  default_root_dir: exp/CSJ/ver211120_1
-  out_dir: predicted_data/utokyo_naist_lecture/speaker1_uno/ver220211_pred
+  out_dir: ./predicted_data/example
   gpus: 1
   auto_select_gpus: true
-  checkpoint:
-    step: 59999
+  model_ckpt_path: ../../../grouping_prediction-lrec2022/prediction/git_predict_filledpauses_groups/exp/CSJ/ver220209/non_personalized/ckpt/epoch=31-step=59999.ckpt

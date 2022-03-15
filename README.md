@@ -13,21 +13,27 @@ Our recommendation of the Python version is ``3.8``.
 ## Preparation
 
 ### BERT
-Install BERT model to the directory ``bert/`` from [here](https://nlp.ist.i.kyoto-u.ac.jp/?ku_bert_japanese). We use pytorch-pretrained-BERT with LARGE WWM version.
+Install BERT model to the directory ``./bert/`` from [here](https://nlp.ist.i.kyoto-u.ac.jp/?ku_bert_japanese). We use pytorch-pretrained-BERT with LARGE WWM version.
 
 
 ## Synthesize speech with filled pauses
 This consists of two processes: prediction and synthesis.
 
 ### Step 1: Prediction
-1. First, preprocess data for prediction. This follows the setting written in ``config_predict/preprocess.yaml``.
+1. First, prepare a file of the utterance list. You can see an example of that in ``./predict_preprocessed_data/example``.
+2. Next, run the script of preprocess for filled pause prediction. This follows the setting written in ``./config_predict/preprocess.yaml``. Change the setting accordingly.
 ```
-python preprocess_predict.py
+python predict_preprocess.py
 ```
-2. Run the script for prediction. This follows the setting written in ``config_predict/predict.yaml``.
+2. Next, run the script of filled pause prediction. This follows the setting written in ``./config_predict/predict.yaml``. Change the setting accordingly.
 ```
 python predict_fp.py
 ```
+3. Finally, run the script of postprocess as the preparation for the next synthesis step. This follows the setting written in ``./config_predict/postprocess.yaml``. Change the setting accordingly.
+```
+python predict_postprocess.py
+```
+
 ### Step 2: Synthesis
 
 
@@ -36,7 +42,7 @@ python predict_fp.py
 
 ### Step 1: Preparation
 
-1. First, put files of phoneme labels, accents, and filled pause tags into the directory of preprocessed data ``preprocessed_data``, and put files of raw texts and waves into the directory of raw data ``raw_data``. You can see an example with the required formats thre.
+1. First, put files of phoneme labels, accents, and filled pause tags into the directory of preprocessed data ``./preprocessed_data``, and put files of raw texts and waves into the directory of raw data ``./raw_data``. You can see an example with the required formats thre.
    
 2. Generate TextGrid files following an open-sourced script, [TextGridConverter](https://github.com/Syuparn/TextGridConverter).
    

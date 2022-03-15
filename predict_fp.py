@@ -76,7 +76,6 @@ class MyLightningModel(pl.LightningModule):
     def __init__(
         self,
         model,
-        fillers,
         train_filler_rate_dict=None,
         dev_filler_rate_dict=None,
         loss_weights=None,
@@ -90,7 +89,6 @@ class MyLightningModel(pl.LightningModule):
 
         self.model = model
 
-        self.fillers = fillers
         self.train_filler_rate_dict = train_filler_rate_dict
         self.dev_filler_rate_dict = dev_filler_rate_dict
 
@@ -169,7 +167,7 @@ class MyLightningModel(pl.LightningModule):
         )
 
         # return optimizer
-        return [optimizer], [lr_scheduler]
+        return {"optimizer": optimizer, "lr_scheduler": lr_scheduler}
 
 
 def predict_utokyo_naist_lecture(
@@ -197,10 +195,9 @@ def predict_utokyo_naist_lecture(
     )
 
     # output directory
-    pred_dir = out_dir / "prediction_all"
-    pred_text_dir = pred_dir / "text"
-    pred_dir.mkdir(parents=True, exist_ok=True)
-    pred_text_dir.mkdir(parents=True, exist_ok=True)
+    out_text_dir = out_dir / "text"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_text_dir.mkdir(parents=True, exist_ok=True)
 
     # Prediction
     out_utt_list = []
@@ -230,7 +227,7 @@ def predict_utokyo_naist_lecture(
             i_utt = 0
             if filler_predictions[0] > 0:
                 out_utt_list.append(f"{breath_para_name}-{i_utt}:(F)" + fps[filler_predictions[0]-1])
-                with open(pred_text_dir / f"{breath_para_name}-{i_utt}.txt", "w") as f:
+                with open(out_text_dir / f"{breath_para_name}-{i_utt}.txt", "w") as f:
                     f.write(fps[filler_predictions[0]-1])
                 i_utt += 1
 
@@ -243,12 +240,12 @@ def predict_utokyo_naist_lecture(
                 if f_pred > 0:
                     if len(out_texts) > 0:
                         out_utt_list.append(f"{breath_para_name}-{i_utt}:" + "".join(out_texts))
-                        with open(pred_text_dir / f"{breath_para_name}-{i_utt}.txt", "w") as f:
+                        with open(out_text_dir / f"{breath_para_name}-{i_utt}.txt", "w") as f:
                             f.write("".join(out_texts))
                         i_utt += 1
 
                     out_utt_list.append(f"{breath_para_name}-{i_utt}:(F)" + fps[int(f_pred)-1])
-                    with open(pred_text_dir / f"{breath_para_name}-{i_utt}.txt", "w") as f:
+                    with open(out_text_dir / f"{breath_para_name}-{i_utt}.txt", "w") as f:
                         f.write(fps[f_pred-1])
                     i_utt += 1
 
@@ -256,41 +253,36 @@ def predict_utokyo_naist_lecture(
 
             if len(out_texts) > 0:
                 out_utt_list.append(f"{breath_para_name}-{i_utt}:" + "".join(out_texts))
-                with open(pred_text_dir / f"{breath_para_name}-{i_utt}.txt", "w") as f:
+                with open(out_text_dir / f"{breath_para_name}-{i_utt}.txt", "w") as f:
                     f.write("".join(out_texts))
 
     # Write predicted text
     out_utt_list = sorted(
         out_utt_list, 
-        key=lambda u: (u.split("-")[0], int(u.split("-")[1]), int(u.split("-")[2]), int(u.split(":")[0].split("-")[3]))
+        key=lambda u: tuple([int(n) for n in u.split(":")[0].split("-")])
     )
-    with open(pred_dir / "utt_filler_list.txt", "w") as f:
+    with open(out_dir / "utt_filler_list.txt", "w") as f:
         f.write("\n".join(out_utt_list))
 
     # check
     with open(utt_list_path, "r") as f:
         utt_list = sorted(
             [l.strip() for l in f], 
-            key=lambda u: (u.split(":")[0], int(u.split(":")[1]), int(u.split(":")[2]))
+            key=lambda u: tuple([int(n) for n in u.split(":")[:-1]])
         )
-        utt_text = "".join([re.sub(r"\(F.*?\)", "", utt.split(":")[3].replace(" ", "")) for utt in utt_list])
+        utt_text = "".join([re.sub(r"\(F.*?\)", "", utt.split(":")[-1].replace(" ", "")) for utt in utt_list])
     out_utt_text = "".join([utt.split(":")[1] for utt in out_utt_list if not utt.split(":")[1].startswith("(F)")])
     assert utt_text == out_utt_text, f"utt_text should be equal to out_utt_text\nutt_text:\n{utt_text}\n\nout_utt_text:\n{out_utt_text}"
 
-@hydra.main(config_path="conf/predict", config_name="config")
+@hydra.main(config_path="config_predict", config_name="predict")
 def predict(config: DictConfig):
 
     # Phase
     phase = "eval"
 
     # Out directory
-    default_root_dir = Path(to_absolute_path(config[phase].default_root_dir))
-    ckpt_dir = default_root_dir / "ckpt"
-    out_dir = Path(to_absolute_path(config[phase].out_dir))
+    out_dir = Path(config[phase].out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-
-    # Load config
-    train_config = OmegaConf.load(default_root_dir / "config.yaml")
 
     # save config
     with open(out_dir / "config.yaml", "w") as f:
@@ -305,25 +297,13 @@ def predict(config: DictConfig):
         fps = [l.strip() for l in f]
 
     # Load model
-    model = hydra.utils.instantiate(train_config.model.netG)
-    ckpt_path = list(ckpt_dir.glob(
-        "*-step={}.ckpt".format(str(config[phase].checkpoint.step))
-    ))[0]
-    print("--- ckpt path: {}".format(ckpt_path))
+    model = hydra.utils.instantiate(config.model.netG)
     pl_model = MyLightningModel.load_from_checkpoint(
-        str(ckpt_path),
-        model=model,
-        fps=fps,
-        strict=False)
+        config[phase].model_ckpt_path, model=model, strict=False)
 
     # Trainer
-    trainer = pl.Trainer(
-        # gpu
-        gpus=config[phase].gpus,
-        auto_select_gpus=config[phase].auto_select_gpus,
-        default_root_dir=default_root_dir,
-        # profiler="simple",
-    )
+    trainer = pl.Trainer(gpus=config[phase].gpus,
+                         auto_select_gpus=config[phase].auto_select_gpus)
 
     predict_utokyo_naist_lecture(config, trainer, pl_model, out_dir, fps)
 
