@@ -49,7 +49,17 @@ python predict_postprocess.py
 
 ### Step 2: Synthesis
 
+1. First, run the script of preprocess for speech synthesis. This follows the setting written in ``./config/.../preprocess.yaml``. Change the setting accordingly.
 
+```
+python preprocess.py path/to/preprocess/config
+```
+
+2. Next, run the script of synthesis. This follows the setting written in ``./config/.../synthesize.yaml``. Change the setting accordingly.
+
+```
+python preprocess.py path/to/preprocess/config
+```
 
 ## Train a speech synthesis model
 
