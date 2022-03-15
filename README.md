@@ -1,6 +1,8 @@
 # Speech synthesis with filled pauses and training scripts
 
-This is a source implementation of speech synthesis model with filled pauses. There are...
+This is an open-source implementation of speech synthesis model with filled pauses based on FastSpeech2. The key charasteristics are as follows:
+- There is a script that synthesizes spontaneous speech with filled pauses from an input text without filled pauses by using prepared models of filled pause prediction and speech synthesis.
+- Filled pause tags are introduced to the speech synthesis model to synthesize natural spontaneous speech with filled pauses.
 
 ## Requirements
 
@@ -49,7 +51,7 @@ python predict_postprocess.py
 
 ### Step 2: Synthesis
 
-1. First, run the script of preprocess for speech synthesis. This follows the setting written in ``./config/.../preprocess.yaml``. Change the setting accordingly.
+1. First, run the script of preprocess for speech synthesis. This follows the setting written in ``./config/.../preprocess.yaml``. Set the parameter ``test`` to ``True``. Change the setting accordingly.
 
 ```
 python preprocess.py path/to/preprocess/config
@@ -67,7 +69,7 @@ python synthesize.py path/to/synthesis/config --restore_step xxx
 
 1. First, put files of phoneme labels, accents, and filled pause tags into the directory of preprocessed data ``./preprocessed_data``, and put files of raw texts and waves into the directory of raw data ``./raw_data``. You can see an example with the required formats thre.
    
-2. Generate TextGrid files following an open-sourced script, [TextGridConverter](https://github.com/Syuparn/TextGridConverter).
+2. Generate TextGrid files following an open-source script, [TextGridConverter](https://github.com/Syuparn/TextGridConverter).
    
 3. The required directory structure is as follows:
 ```
@@ -89,18 +91,18 @@ python synthesize.py path/to/synthesis/config --restore_step xxx
 ```
 
 ### Step 2: Preprocess
-The script ``preprocess.py`` ... 
-This follows the setting written in ``conf/xxx.yaml``. Change the setting accordingly.
+Run the script ``preprocess.py`` to preprocess data for the training of the speech synthesis model.
+This follows the setting written in ``config/.../preprocess.yaml``. Set the parameter ``test`` to ``False``. Change the setting accordingly.
 ```
-python preprocess.py
+python preprocess.py path/to/preprocess/config
 ```
 
 ### Step 3: Training
-The script ``train.py`` train the xxx. This follows the setting written in ``conf/train/config.yaml``. Change the setting accordingly.
+Run the script ``train.py`` to train the speech synthesis model. This follows the setting written in ``config/.../preprocess.yaml``, ``config/.../model.yaml``, and ``config/.../train.yaml``. Change the setting accordingly.
 ```
-python train.py
+python train.py -p path/to/preprocess/config -m path/to/model/config -t path/to/train/config
 ```
-You can select whether you use FP tag or not in ``conf/train/config.yaml``.
+You can select whether you use FP tag or not in ``config/.../train.yaml``.
 ```
 use_fp_tag: True or False
 ```
