@@ -1,0 +1,5 @@
+0 3950000 xx^xx-sil+m=a/A:xx+xx+xx/B:xx-xx_xx/C:xx_xx+xx/D:xx+xx_xx/E:xx_xx!xx_xx-xx/F:xx_xx#xx_xx@xx_xx|xx_xx/G:2_1%0_xx_xx/H:xx_xx/I:xx-xx@xx+xx&xx-xx|xx+xx/J:1_2/K:1+1-2
+3950000 4400000 xx^sil-m+a=a/A:0+1+2/B:xx-xx_xx/C:06_xx+xx/D:xx+xx_xx/E:xx_xx!xx_xx-xx/F:2_1#0_xx@1_1|1_2/G:xx_xx%xx_xx_xx/H:xx_xx/I:1-2@1+1&1-1|1+2/J:xx_xx/K:1+1-2
+4400000 5300000 sil^m-a+a=sil/A:0+1+2/B:xx-xx_xx/C:06_xx+xx/D:xx+xx_xx/E:xx_xx!xx_xx-xx/F:2_1#0_xx@1_1|1_2/G:xx_xx%xx_xx_xx/H:xx_xx/I:1-2@1+1&1-1|1+2/J:xx_xx/K:1+1-2
+5300000 6450000 m^a-a+sil=xx/A:1+2+1/B:xx-xx_xx/C:06_xx+xx/D:xx+xx_xx/E:xx_xx!xx_xx-xx/F:2_1#0_xx@1_1|1_2/G:xx_xx%xx_xx_xx/H:xx_xx/I:1-2@1+1&1-1|1+2/J:xx_xx/K:1+1-2
+6450000 11700000 a^a-sil+xx=xx/A:xx+xx+xx/B:xx-xx_xx/C:xx_xx+xx/D:xx+xx_xx/E:2_1!0_xx-xx/F:xx_xx#xx_xx@xx_xx|xx_xx/G:xx_xx%xx_xx_xx/H:1_2/I:xx-xx@xx+xx&xx-xx|xx+xx/J:xx_xx/K:1+1-2

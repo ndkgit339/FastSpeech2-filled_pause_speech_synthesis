@@ -1,10 +1,10 @@
 import hydra
 from omegaconf import DictConfig
 
-from utils_predict import prepare_notalign, prepare_accent, \
+from predict_utils import prepare_notalign, prepare_accent, \
                           concatenate_notaligned_data, copy_postprocessed_data
 
-@hydra.main(config_path="config_predict", config_name="postprocess")
+@hydra.main(config_path="predict_config", config_name="postprocess")
 def main(config: DictConfig):
 
     prepare_notalign(config.data_dir, n_jobs=config.n_jobs)

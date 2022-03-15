@@ -10,7 +10,7 @@ random_seed: 42
 data:
   batch_size: 32
   num_workers: 12
-  data_dir: ./preprocessed_data_predict/example
+  data_dir: ./predict_preprocessed_data/example
   filler_list: ./fp.list
 eval:
   out_dir: ./predicted_data/example

@@ -11,7 +11,7 @@ from pypinyin import pinyin, Style
 
 from utils.model import get_model, get_vocoder
 from utils.tools import to_device, synth_samples
-from dataset import TextDataset
+from dataset import TextDataset, DatasetForTest
 from text import text_to_sequence, symbols
 import pyopenjtalk
 from prepare_tg_accent import pp_symbols
@@ -94,17 +94,35 @@ def preprocess_japanese(text:str):
 
 
 
-def synthesize(model, step, configs, vocoder, batchs, control_values):
+def synthesize(model, step, configs, vocoder, batchs, control_values,
+               result_path):
     preprocess_config, model_config, train_config = configs
     pitch_control, energy_control, duration_control = control_values
 
+    result_path = result_path / "data"
+    result_path.mkdir(parents=True, exist_ok=True)
+
+    use_fp_tag = train_config["use_fp_tag"]
+
     use_accent = preprocess_config["preprocessing"]["accent"]["use_accent"]
+
     for batch in batchs:
-        batch = to_device(batch, device)
+        batch = to_device(batch, device, use_accent=use_accent, with_tag=use_fp_tag)
         accents = None
-        if use_accent:
-            accents = batch[-1]
-            batch = batch[:-1]
+        fp_tag = None
+        if use_fp_tag:
+            if use_accent:
+                accents = batch[-2]
+                fp_tag = batch[-1]
+                batch = batch[:-2]
+            else:
+                fp_tag = batch[-1]
+                batch = batch[:-1]
+        else:
+            if use_accent:
+                accents = batch[-1]
+                batch = batch[:-1]
+
         with torch.no_grad():
             # Forward
             output = model(
@@ -112,7 +130,8 @@ def synthesize(model, step, configs, vocoder, batchs, control_values):
                 p_control=pitch_control,
                 e_control=energy_control,
                 d_control=duration_control,
-                accents=accents
+                accents=accents,
+                fp_tag=fp_tag
             )
             synth_samples(
                 batch,
@@ -120,113 +139,150 @@ def synthesize(model, step, configs, vocoder, batchs, control_values):
                 vocoder,
                 model_config,
                 preprocess_config,
-                train_config["path"]["result_path"],
+                result_path,
             )
 
 
 if __name__ == "__main__":
 
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument("--restore_step", type=int, required=True)
+    # parser.add_argument(
+    #     "--mode",
+    #     type=str,
+    #     choices=["batch", "single"],
+    #     required=True,
+    #     help="Synthesize a whole dataset or a single sentence",
+    # )
+    # parser.add_argument(
+    #     "--source",
+    #     type=str,
+    #     default=None,
+    #     help="path to a source file with format like train.txt and val.txt, for batch mode only",
+    # )
+    # parser.add_argument(
+    #     "--text",
+    #     type=str,
+    #     default=None,
+    #     help="raw text to synthesize, for single-sentence mode only",
+    # )
+    # parser.add_argument(
+    #     "--speaker_id",
+    #     type=int,
+    #     default=0,
+    #     help="speaker ID for multi-speaker synthesis, for single-sentence mode only",
+    # )
+    # parser.add_argument(
+    #     "-p",
+    #     "--preprocess_config",
+    #     type=str,
+    #     required=True,
+    #     help="path to preprocess.yaml",
+    # )
+    # parser.add_argument(
+    #     "-m", "--model_config", type=str, required=True, help="path to model.yaml"
+    # )
+    # parser.add_argument(
+    #     "-t", "--train_config", type=str, required=True, help="path to train.yaml"
+    # )
+    # parser.add_argument(
+    #     "--pitch_control",
+    #     type=float,
+    #     default=1.0,
+    #     help="control the pitch of the whole utterance, larger value for higher pitch",
+    # )
+    # parser.add_argument(
+    #     "--energy_control",
+    #     type=float,
+    #     default=1.0,
+    #     help="control the energy of the whole utterance, larger value for larger volume",
+    # )
+    # parser.add_argument(
+    #     "--duration_control",
+    #     type=float,
+    #     default=1.0,
+    #     help="control the speed of the whole utterance, larger value for slower speaking rate",
+    # )
+    # args = parser.parse_args()
+
     parser = argparse.ArgumentParser()
-    parser.add_argument("--restore_step", type=int, required=True)
-    parser.add_argument(
-        "--mode",
-        type=str,
-        choices=["batch", "single"],
-        required=True,
-        help="Synthesize a whole dataset or a single sentence",
-    )
-    parser.add_argument(
-        "--source",
-        type=str,
-        default=None,
-        help="path to a source file with format like train.txt and val.txt, for batch mode only",
-    )
-    parser.add_argument(
-        "--text",
-        type=str,
-        default=None,
-        help="raw text to synthesize, for single-sentence mode only",
-    )
-    parser.add_argument(
-        "--speaker_id",
-        type=int,
-        default=0,
-        help="speaker ID for multi-speaker synthesis, for single-sentence mode only",
-    )
-    parser.add_argument(
-        "-p",
-        "--preprocess_config",
-        type=str,
-        required=True,
-        help="path to preprocess.yaml",
-    )
-    parser.add_argument(
-        "-m", "--model_config", type=str, required=True, help="path to model.yaml"
-    )
-    parser.add_argument(
-        "-t", "--train_config", type=str, required=True, help="path to train.yaml"
-    )
-    parser.add_argument(
-        "--pitch_control",
-        type=float,
-        default=1.0,
-        help="control the pitch of the whole utterance, larger value for higher pitch",
-    )
-    parser.add_argument(
-        "--energy_control",
-        type=float,
-        default=1.0,
-        help="control the energy of the whole utterance, larger value for larger volume",
-    )
-    parser.add_argument(
-        "--duration_control",
-        type=float,
-        default=1.0,
-        help="control the speed of the whole utterance, larger value for slower speaking rate",
-    )
+    parser.add_argument("config", type=str, help="path to synthesize.yaml")
+    parser.add_argument("--restore_step", type=int, default=0, help="restore step")
     args = parser.parse_args()
 
+    config = yaml.load(open(args.config, "r"), Loader=yaml.FullLoader)
+    config["restore_step"] = args.restore_step
+
     # Check source texts
-    if args.mode == "batch":
-        assert args.source is not None and args.text is None
-    if args.mode == "single":
-        assert args.source is None and args.text is not None
+    if config["mode"] == "batch":
+        assert config["source"] is not None and config["text"] is None
+    if config["mode"] == "single":
+        assert config["source"] is None and config["text"] is not None
 
     # Read Config
     preprocess_config = yaml.load(
-        open(args.preprocess_config, "r"), Loader=yaml.FullLoader
+        open(config["preprocess_config"], "r"), Loader=yaml.FullLoader
     )
-    model_config = yaml.load(open(args.model_config, "r"), Loader=yaml.FullLoader)
-    train_config = yaml.load(open(args.train_config, "r"), Loader=yaml.FullLoader)
+    model_config = yaml.load(open(config["model_config"], "r"), Loader=yaml.FullLoader)
+    train_config = yaml.load(open(config["train_config"], "r"), Loader=yaml.FullLoader)
     configs = (preprocess_config, model_config, train_config)
 
+    result_path = Path(config["result_path"])
+    result_path.mkdir(parents=True, exist_ok=True)
+    with open(result_path / "synthesize.yaml", "w") as f:
+        yaml.dump(config, f)
+    with open(result_path / "preprocess.yaml", "w") as f:
+        yaml.dump(preprocess_config, f)
+    with open(result_path / "model.yaml", "w") as f:
+        yaml.dump(model_config, f)
+    with open(result_path / "train.yaml", "w") as f:
+        yaml.dump(train_config, f)
+
     # Get model
-    model = get_model(args, configs, device, train=False)
+    model = get_model(args.restore_step, configs, device, train=False)
 
     # Load vocoder
     vocoder = get_vocoder(model_config, device)
 
     # Preprocess texts
-    if args.mode == "batch":
+    if config["mode"] == "batch":
         # Get dataset
-        dataset = TextDataset(args.source, preprocess_config)
-        batchs = DataLoader(
-            dataset,
-            batch_size=8,
-            collate_fn=dataset.collate_fn,
-        )
+        if config["target"]:
+            dataset = DatasetForTest(
+                config["source"].split("/")[-1], preprocess_config, train_config,
+            )
+            dataloader = DataLoader(
+                dataset,
+                batch_size=32,
+                collate_fn=dataset.collate_fn,
+            )
+            control_values = config["pitch_control"], config["energy_control"], config["duration_control"]
+            synthesize(model, config["restore_step"], configs, vocoder,
+                       dataloader, control_values, result_path)
+        else:
+            dataset = TextDataset(config["source"], preprocess_config)
+            dataloader = DataLoader(
+                dataset,
+                batch_size=8,
+                collate_fn=dataset.collate_fn,
+            )
+            control_values = config["pitch_control"], config["energy_control"], config["duration_control"]
+            synthesize(model, config["restore_step"], configs, vocoder,
+                       dataloader, control_values, result_path)
+
     symbol_to_id = {s: i for i, s in enumerate(symbols)}
     accent_to_id = {'0':0, '[':1, ']':2, '#':3}
 
-    if args.mode == "single":
-        ids = raw_texts = [args.text[:100]]
-        speakers = np.array([args.speaker_id])
+    if config["mode"] == "single":
+        ids = raw_texts = [config["text"][:100]]
+        speakers = np.array([config["speaker_id"]])
         if preprocess_config["preprocessing"]["text"]["language"] == "en":
-            texts = np.array([preprocess_english(args.text, preprocess_config)])
+            texts = np.array([preprocess_english(config["text"], preprocess_config)])
         elif preprocess_config["preprocessing"]["text"]["language"] == "zh":
-            texts = np.array([preprocess_mandarin(args.text, preprocess_config)])
+            texts = np.array([preprocess_mandarin(config["text"], preprocess_config)])
         elif preprocess_config["preprocessing"]["text"]["language"] == "ja":
-            phonemes, accents = preprocess_japanese(args.text)
+            texts = np.array([[symbol_to_id[t] for t in config["text"].replace("{", "").replace("}", "").split()]])
+            phonemes, accents = preprocess_japanese(config["text"])
             print(phonemes,accents)
             texts = np.array([[symbol_to_id[t] for t in phonemes]])
             if preprocess_config["preprocessing"]["accent"]["use_accent"]:
@@ -236,8 +292,9 @@ if __name__ == "__main__":
 
         text_lens = np.array([len(texts[0])])
         print(text_lens)
-        batchs = [(ids, raw_texts, speakers, texts, text_lens, max(text_lens),accents)]
+        batchs = [(ids, raw_texts, speakers, texts, text_lens, max(text_lens), accents)]
 
-    control_values = args.pitch_control, args.energy_control, args.duration_control
-
-    synthesize(model, args.restore_step, configs, vocoder, batchs, control_values)
+        control_values = config["pitch_control"], config["energy_control"], \
+                         config["duration_control"]
+        synthesize(model, config["restore_step"], configs, vocoder, batchs,
+                   control_values, result_path)

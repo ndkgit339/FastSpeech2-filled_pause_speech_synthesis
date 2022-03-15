@@ -16,8 +16,7 @@ import numpy as np
 import torch
 
 # My library
-from preprocessor_predict import extract_feats_test
-
+from predict_preprocessor import extract_feats_test
 
 def process_morph(data_dir):
 
@@ -91,7 +90,7 @@ def extract_feats_test(fp_list_path, bert_model_dir, data_dir, utt_list_name):
             preprocess_utt(utt_id, utt, infeats_dir, outfeats_dir)
 
 
-@hydra.main(config_path="config_predict", config_name="preprocess")
+@hydra.main(config_path="predict_config", config_name="preprocess")
 def main(config: DictConfig):
     # Set random seed
     random.seed(config.random_seed)

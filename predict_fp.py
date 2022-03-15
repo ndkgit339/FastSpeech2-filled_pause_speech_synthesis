@@ -274,7 +274,7 @@ def predict_utokyo_naist_lecture(
     out_utt_text = "".join([utt.split(":")[1] for utt in out_utt_list if not utt.split(":")[1].startswith("(F)")])
     assert utt_text == out_utt_text, f"utt_text should be equal to out_utt_text\nutt_text:\n{utt_text}\n\nout_utt_text:\n{out_utt_text}"
 
-@hydra.main(config_path="config_predict", config_name="predict")
+@hydra.main(config_path="predict_config", config_name="predict")
 def predict(config: DictConfig):
 
     # Phase
