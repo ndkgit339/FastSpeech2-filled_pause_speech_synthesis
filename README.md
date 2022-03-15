@@ -22,9 +22,9 @@ Install BERT model to the directory ``./bert/`` from [here](https://nlp.ist.i.ky
 
 This consists of two processes: filled pause prediction and speech synthesis.
 
-### Step 0: Preparation
+### Step 0: Preparation of pre-trained models
 
-First of all, prepare filled pause prediction model and speech synthesis model. You can train a prediction model in [filledpause_prediction_group](https://github.com/ndkgit339/filledpause_prediction_group) and a speech synthesis model by using the script described below. Put the prediction model in ``./xxx`` and the speech synthesis model in ``./xxx``. You can see examples there.
+First of all, prepare pre-trained filled pause prediction model and speech synthesis model. You can train a prediction model in [filledpause_prediction_group](https://github.com/ndkgit339/filledpause_prediction_group) and a speech synthesis model by using the script described below. Put the prediction model in ``./xxx`` and the speech synthesis model in ``./xxx``. You can see examples there.
 
 ### Step 1: Prediction
 
@@ -58,7 +58,7 @@ python preprocess.py path/to/preprocess/config
 2. Next, run the script of synthesis. This follows the setting written in ``./config/.../synthesize.yaml``. Change the setting accordingly.
 
 ```
-python preprocess.py path/to/preprocess/config
+python synthesize.py path/to/synthesis/config --restore_step xxx
 ```
 
 ## Train a speech synthesis model
