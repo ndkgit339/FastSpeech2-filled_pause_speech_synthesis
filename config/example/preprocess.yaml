@@ -1,10 +1,10 @@
-dataset: "utokyo_lecture"
+dataset: "example"
 
 path:
   corpus_path: ""
   lexicon_path: ""
-  raw_path: "./raw_data/utokyo_lecture/speaker_A"
-  preprocessed_path: "./preprocessed_data/utokyo_lecture/speaker_A"
+  raw_path: "./raw_data/example"
+  preprocessed_path: "./preprocessed_data/example"
 
 preprocessing:
   val_size: 512
@@ -31,4 +31,4 @@ preprocessing:
   accent:
     use_accent: True
   use_fp_tag: True
-test: false
+test: True

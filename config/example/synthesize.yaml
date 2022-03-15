@@ -1,0 +1,15 @@
+mode: batch
+target: False
+source: ./preprocessed_data/example/test.txt
+text: 
+speaker_id: 
+
+result_path: ./output/example/result
+
+preprocess_config: ./preprocessed_data/example/preprocess.yaml
+model_config: ./output/utokyo_lecture/speaker1_uno/ver220209_1/config/model.yaml
+train_config: ./output/utokyo_lecture/speaker1_uno/ver220209_1/config/train.yaml
+
+pitch_control: 1.0
+energy_control: 1.0
+duration_control: 1.0
