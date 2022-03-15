@@ -1,6 +1,8 @@
 import re
 import argparse
 from string import punctuation
+from pathlib import Path
+from tqdm import tqdm
 
 import torch
 import yaml
@@ -106,8 +108,8 @@ def synthesize(model, step, configs, vocoder, batchs, control_values,
 
     use_accent = preprocess_config["preprocessing"]["accent"]["use_accent"]
 
-    for batch in batchs:
-        batch = to_device(batch, device, use_accent=use_accent, with_tag=use_fp_tag)
+    for batch in tqdm(batchs):
+        batch = to_device(batch, device, use_accent=use_accent, use_fp_tag=use_fp_tag)
         accents = None
         fp_tag = None
         if use_fp_tag:
@@ -260,7 +262,7 @@ if __name__ == "__main__":
             synthesize(model, config["restore_step"], configs, vocoder,
                        dataloader, control_values, result_path)
         else:
-            dataset = TextDataset(config["source"], preprocess_config)
+            dataset = TextDataset(config["source"], preprocess_config, train_config)
             dataloader = DataLoader(
                 dataset,
                 batch_size=8,
