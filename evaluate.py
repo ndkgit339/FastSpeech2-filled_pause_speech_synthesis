@@ -15,11 +15,16 @@ from dataset import Dataset
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-def evaluate(model, step, configs, logger=None, vocoder=None):
+def evaluate(model, step, configs, logger=None, vocoder=None,
+             no_targets=True):
     preprocess_config, model_config, train_config = configs
 
     # use accent info?
     use_accent = preprocess_config['preprocessing']["accent"]["use_accent"]
+
+    # fine tuning with fp tag
+    use_fp_tag = train_config["use_fp_tag"]
+
     # Get dataset
     dataset = Dataset(
         "val.txt", preprocess_config, train_config, sort=False, drop_last=False
@@ -39,18 +44,30 @@ def evaluate(model, step, configs, logger=None, vocoder=None):
     loss_sums = [0 for _ in range(6)]
     for batchs in loader:
         for batch in batchs:
-            batch = to_device(batch, device)
+            batch = to_device(batch, device, use_fp_tag=use_fp_tag, use_accent=use_accent)
             with torch.no_grad():
                 # Forward
-                if use_accent:
-                    accents = batch[-1]
-                    batch = batch[:-1]
-                    output = model(*(batch[2:]),accents=accents)
+                if use_fp_tag:
+                    if use_accent:
+                        accents = batch[-2]
+                        fp_tag = batch[-1]
+                    else:
+                        accents = None
+                        fp_tag = batch[-1]             
                 else:
-                    output = model(*(batch[2:]))
-                losses = Loss(batch, output)
+                    if use_accent:
+                        accents = batch[-1]
+                        fp_tag = None
+                    else:
+                        accents = None
+                        fp_tag = None
 
-                # Cal Loss
+                output = model(*(batch[2:12]), accents=accents, fp_tag=fp_tag)
+
+                losses = Loss(batch[:12], output)
+
+                if no_targets:
+                    output = model(*(batch[2:6]), accents=accents, fp_tag=fp_tag)
 
                 for i in range(len(losses)):
                     loss_sums[i] += losses[i].item() * len(batch[0])
@@ -75,6 +92,7 @@ def evaluate(model, step, configs, logger=None, vocoder=None):
             logger,
             fig=fig,
             tag="Validation/step_{}_{}".format(step, tag),
+            step=step
         )
         sampling_rate = preprocess_config["preprocessing"]["audio"]["sampling_rate"]
         log(
@@ -82,12 +100,14 @@ def evaluate(model, step, configs, logger=None, vocoder=None):
             audio=wav_reconstruction,
             sampling_rate=sampling_rate,
             tag="Validation/step_{}_{}_reconstructed".format(step, tag),
+            step=step
         )
         log(
             logger,
             audio=wav_prediction,
             sampling_rate=sampling_rate,
             tag="Validation/step_{}_{}_synthesized".format(step, tag),
+            step=step
         )
 
     return message
