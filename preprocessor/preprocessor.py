@@ -9,6 +9,7 @@ import pyworld as pw
 from scipy.interpolate import interp1d
 from sklearn.preprocessing import StandardScaler
 from tqdm import tqdm
+import yaml
 
 import audio as Audio
 
@@ -156,6 +157,45 @@ class Preprocessor:
 
         return out
 
+    def build_from_path_test(self):
+        with open((os.path.join(self.out_dir, "preprocess.yaml")), "w") as f:
+            yaml.dump(self.config, f)
+
+        print("Processing Data ...")
+        out = list()
+
+        # Compute pitch, energy, duration, and mel-spectrogram
+        speakers = {}
+        for i, speaker in enumerate(tqdm(os.listdir(self.in_dir))):
+            speakers[speaker] = i
+            for raw_text_name in tqdm(os.listdir(os.path.join(self.in_dir, speaker))):
+                if ".lab" not in raw_text_name:
+                    continue
+
+                basename = raw_text_name.split(".")[0]
+                # tg_path = os.path.join(
+                #     self.out_dir, "TextGrid", speaker, "{}.TextGrid".format(basename)
+                # )
+                # if os.path.exists(tg_path):
+                info = self.process_utterance_test(speaker, basename)
+                if info is None:
+                    continue
+                out.append(info)
+            
+        # Save files
+        with open(os.path.join(self.out_dir, "speakers.json"), "w") as f:
+            f.write(json.dumps(speakers))
+
+        out = sorted(out)
+        out = [r for r in out if r is not None]
+
+        # Write metadata
+        with open(os.path.join(self.out_dir, "test.txt"), "w", encoding="utf-8") as f:
+            for m in out:
+                f.write(m + "\n")
+
+        return out
+
     def process_utterance(self, speaker, basename):
         wav_path = os.path.join(self.in_dir, speaker, "{}.wav".format(basename))
         text_path = os.path.join(self.in_dir, speaker, "{}.lab".format(basename))
@@ -272,6 +312,38 @@ class Preprocessor:
                 mel_spectrogram.shape[1],
             )
 
+    def process_utterance_test(self, speaker, basename):
+        text_path = os.path.join(self.in_dir, speaker, "{}.lab".format(basename))
+        # tg_path = os.path.join(
+        #     self.out_dir, "TextGrid", speaker, "{}.TextGrid".format(basename)
+        # )
+        lab_path = os.path.join(
+            self.out_dir, "lab", speaker, "{}.lab".format(basename)
+        )
+        fp_tag_path = os.path.join(
+            self.out_dir, "fp_tag", speaker, "{}.ftag".format(basename)
+        )
+        # Get alignments
+        # textgrid = tgt.io.read_textgrid(tg_path)
+        # phone, duration, start, end = self.get_alignment(
+        #     textgrid.get_tier_by_name("phones")
+        # )
+        phone = self.get_phone(lab_path)
+        text = "{" + " ".join(phone) + "}"
+
+        # Read raw text
+        with open(text_path, "r") as f:
+            raw_text = f.readline().strip("\n")
+
+        # Read filled pause tag
+        with open(fp_tag_path, "r") as f:
+            fp_tag = f.readline().strip("\n")
+
+        # check length of phones and tags
+        assert len(phone) == len(fp_tag.split(" "))
+
+        return "|".join([basename, speaker, text, raw_text, fp_tag])
+
     def get_alignment(self, tier):
         sil_phones = ["sil", "sp", "spn", 'silB', 'silE', '']
 
@@ -311,6 +383,33 @@ class Preprocessor:
         durations = durations[:end_idx]
         assert len(phones) == len(durations)
         return phones, durations, start_time, end_time
+
+    def get_phone(self, lab_path):
+        sil_phones = ["sil", "sp", "spn", 'silB', 'silE', '']
+
+        with open(lab_path, "r") as f:
+            phones = [l.strip() for l in f if len(l.strip()) > 0]
+
+        out_phones = []
+        for p in phones:
+
+            # Trim leading silences
+            if out_phones == []:
+                if p in sil_phones:
+                    continue
+
+            if p not in sil_phones:
+                # For ordinary phones
+                out_phones.append(p)
+                end_idx = len(out_phones)
+            else:
+                # For silent phones
+                out_phones.append('sp')
+
+        # Trim tailing silences
+        out_phones = out_phones[:end_idx]
+
+        return out_phones
 
     def remove_outlier(self, values):
         values = np.array(values)
