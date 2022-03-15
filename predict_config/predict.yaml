@@ -16,4 +16,4 @@ eval:
   out_dir: ./predicted_data/example
   gpus: 1
   auto_select_gpus: true
-  model_ckpt_path: ../../../grouping_prediction-lrec2022/prediction/git_predict_filledpauses_groups/exp/CSJ/ver220209/non_personalized/ckpt/epoch=31-step=59999.ckpt
+  model_ckpt_path: 
