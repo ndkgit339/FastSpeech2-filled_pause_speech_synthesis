@@ -1,5 +1,4 @@
 transformer:
-  tag_dim: 1
   encoder_layer: 4
   encoder_head: 2
   encoder_hidden: 256
@@ -22,7 +21,7 @@ variance_embedding:
   n_bins: 256
 
 jdit:
-  use_jdit: False
+  use_jdit: True
   prenet_hidden: 256
 # gst:
 #   use_gst: False
@@ -39,5 +38,3 @@ max_seq_len: 1000
 vocoder:
   model: "HiFi-GAN" # support 'HiFi-GAN', 'MelGAN'
   speaker: "universal" # support  'LJSpeech', 'universal'
-
-use_fp_tag: True

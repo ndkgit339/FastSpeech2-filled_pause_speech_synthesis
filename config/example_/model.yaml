@@ -1,3 +1,5 @@
+# with_tag: True
+
 transformer:
   tag_dim: 1
   encoder_layer: 4
