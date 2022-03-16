@@ -1,10 +1,5 @@
 # Config
 Here are the config files used to train the single/multi-speaker TTS models.
-4 different configurations are given:
-- LJSpeech: suggested configuration for LJSpeech dataset.
-- LibriTTS: suggested configuration for LibriTTS dataset.
-- AISHELL3: suggested configuration for AISHELL-3 dataset.
-- LJSpeech_paper: closed to the setting proposed in the original FastSpeech 2 paper.
 
 Some important hyper-parameters are explained here.
 
