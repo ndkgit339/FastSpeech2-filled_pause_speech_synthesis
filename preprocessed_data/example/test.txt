@@ -1,0 +1,3 @@
+1|example|{e e sh i N s o o g a k U sh u u n o h a cl t e N n i y o cl t e}|えー深層学習の発展によって|1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+2|example|{m a a h o b o n i N g e N n o y o o n a o N s e e g a m a a}|まーほぼ人間のような音声がまー|1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1
+3|example|{e e g o o s e e d e k i r u y o o n i n a cl t e i m a s U}|えー合成できるようになっています|1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
