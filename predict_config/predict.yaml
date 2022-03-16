@@ -7,13 +7,18 @@ defaults:
   - model: bilstm_bert
 
 random_seed: 42
+n_jobs: 10
+
+data_dir: ./predict_data/example/preprocessed_data
+fp_list_path: ./fp.list
+
+bert_model_dir: ./bert/Japanese_L-24_H-1024_A-16_E-30_BPE_WWM_transformers
+
 data:
   batch_size: 32
   num_workers: 12
-  data_dir: ./predict_preprocessed_data/example
-  filler_list: ./fp.list
 eval:
-  out_dir: ./predicted_data/example
+  out_dir: ./predict_data/example/predicted_data
   gpus: 1
   auto_select_gpus: true
-  model_ckpt_path: 
+  model_ckpt_path: /media/yuta_matsunaga/Matsunaga_disk_1/disfluency/grouping_prediction-lrec2022/prediction/git_predict_filledpauses_groups/exp/CSJ/ver220209/non_personalized/ckpt/epoch=31-step=59999.ckpt

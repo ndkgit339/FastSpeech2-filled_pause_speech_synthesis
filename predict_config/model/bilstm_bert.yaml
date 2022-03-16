@@ -1,6 +1,6 @@
 
 netG:
-  _target_: predict_model.BiLSTM
+  _target_: filledpause_prediction_group.fp_pred_group.model.BiLSTM
   embedding_dim: 1024
   hidden_dim: 1024
   num_layers: 1

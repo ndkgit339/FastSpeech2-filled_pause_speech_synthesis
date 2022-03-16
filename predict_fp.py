@@ -4,6 +4,7 @@ import hydra
 from hydra.utils import to_absolute_path
 from omegaconf import OmegaConf, DictConfig
 import re
+import random
 
 import numpy as np
 import torch
@@ -11,186 +12,47 @@ from torch.utils.data import Dataset, DataLoader
 from torch import nn, optim
 import pytorch_lightning as pl
 
-
-def pad_1d(x, max_len, constant_values=0):
-    x = np.pad(
-        x,
-        (0, max_len - len(x)),
-        mode="constant",
-        constant_values=constant_values,
-    )
-    return x
-
-def pad_2d(x, max_len, constant_values=0):
-    x = np.pad(
-        x,
-        [(0, max_len - len(x)), (0, 0)],
-        mode="constant",
-        constant_values=constant_values,
-    )
-    return x
-
-class NoFillerDataset(Dataset):
-    def __init__(self, in_paths, out_paths, utt_list_path=None):
-        if utt_list_path is not None:
-            self.text_dict = {}
-            with open(utt_list_path, "r") as f:
-                for l in f:
-                    utt = l.strip()
-                    if len(utt) > 0:
-                        utt_name = "-".join(utt.split(":")[:-1])
-                        text = " ".join([
-                            w for w in utt.split(":")[-1].split(" ") 
-                            if not w.startswith("(F")])
-                        # text = re.sub(r"\(F.*?\)", "", utt.split(":")[-1])
-                        self.text_dict[utt_name] = text
-
-        self.in_paths = in_paths
-        self.out_paths = out_paths
-
-    def __getitem__(self, index):
-        in_feat = np.load(self.in_paths[index]).astype(np.float32)
-        out_feat = np.load(self.out_paths[index]).astype(np.float32)
-        in_text = self.text_dict[self.in_paths[index].stem.replace("-feats", "")]
-        sample = {
-            "feat": in_feat, 
-            "out_feat": out_feat, 
-            "text": in_text,
-        }
-        return sample
-
-    def __len__(self):
-        return len(self.in_paths)
-
-    def collate_fn(self, batch):
-        lengths = [len(x["feat"]) for x in batch]
-        max_len = max(lengths)
-        x_batch = torch.stack([torch.from_numpy(pad_2d(x["feat"], max_len)) for x in batch])
-        y_batch = torch.stack([torch.from_numpy(pad_1d(x["out_feat"], max_len)) for x in batch])
-        text_batch = [x["text"] for x in batch]
-        return x_batch, y_batch, text_batch
+from filledpause_prediction_group.fp_pred_group.preprocessor import \
+    process_morph, extract_feats_test
+from filledpause_prediction_group.fp_pred_group.dataset import NoFPDataset
+from filledpause_prediction_group.fp_pred_group.module import MyLightningModel
 
 
-class MyLightningModel(pl.LightningModule):
+def preprocess(config: DictConfig):
+    # Set random seed
+    random.seed(config.random_seed)
 
-    def __init__(
-        self,
-        model,
-        train_filler_rate_dict=None,
-        dev_filler_rate_dict=None,
-        loss_weights=None,
-        optimizer_name="Adam",
-        optimizer_params=None,
-        lr_scheduler_name="StepLR",
-        lr_scheduler_params=None,
-    ):
+    # Save config
+    data_dir = Path(config.data_dir)
+    data_dir.mkdir(parents=True, exist_ok=True)
+    with open(data_dir / "config.yaml", "w") as f:
+        OmegaConf.save(config, f)
 
-        super().__init__()
-
-        self.model = model
-
-        self.train_filler_rate_dict = train_filler_rate_dict
-        self.dev_filler_rate_dict = dev_filler_rate_dict
-
-        if loss_weights:
-            self.criterion = nn.CrossEntropyLoss(torch.Tensor(loss_weights))
-        else:
-            self.criterion = nn.CrossEntropyLoss()
-
-        self.optimizer_name=optimizer_name
-        self.optimizer_params=optimizer_params
-        self.lr_scheduler_name=lr_scheduler_name
-        self.lr_scheduler_params=lr_scheduler_params
-
-    def forward(self, x):
-        return self.model(x)
-
-    def training_step(self, batch, batch_index):
-        x, target = batch
-        output = self.model(x)
-
-        # Loss
-        loss = self.criterion(output.transpose(1, -1), target.to(torch.long))
-
-        # Logging
-        train_logger = self.logger[0].experiment
-        train_logger.add_scalar("Loss", loss, global_step=self.global_step)
-
-        return {
-            "loss": loss,
-            "output": output.detach(),
-            "target": target.detach(),
-        }
-
-    def validation_step(self, batch, batch_index):
-        x, target = batch
-        output = self.model(x)
-
-        # Loss
-        loss = self.criterion(output.transpose(1, -1), target.to(torch.long))
-        self.log("val_loss", loss)
-
-        return {
-            "loss": loss,
-            "output": output.detach(),
-            "target": target.detach(),
-        }
-
-    def predict_step(self, batch, batch_idx, dataloader_idx=None):
-        # this calls forward
-        if len(batch) == 2:
-            x, y = batch
-            return {
-                "predictions": self(x),
-                "targets": y,
-                "batch_idx": batch_idx,
-            }
-        elif len(batch) == 3:
-            x, y, t = batch
-            return {
-                "predictions": self(x),
-                "targets": y,
-                "texts": t,
-                "batch_idx": batch_idx,
-            }
-
-    def configure_optimizers(self):
-        # Optimizer
-        optimizer_class = getattr(optim, self.optimizer_name)
-        optimizer = optimizer_class(
-            self.parameters(), **self.optimizer_params
-        )
-        # lr scheduler
-        lr_scheduler_class = getattr(optim.lr_scheduler, self.lr_scheduler_name)
-        lr_scheduler = lr_scheduler_class(
-            optimizer, **self.lr_scheduler_params
-        )
-
-        # return optimizer
-        return {"optimizer": optimizer, "lr_scheduler": lr_scheduler}
+    # Preprocess
+    print("process morphs...")
+    process_morph(data_dir)
+    print("extract features...")
+    extract_feats_test(data_dir, config.fp_list_path, config.bert_model_dir, "utt_morphs")
 
 
-def predict_utokyo_naist_lecture(
-    config, trainer, model, out_dir, fps):
+def predict_utokyo_naist_lecture(data_dir, batch_size, num_workers, trainer, 
+                                 model, out_dir, fps):
 
     # Paths
-    in_feat_dir = Path(config.data.data_dir) / "infeats"
-    out_feat_dir = Path(config.data.data_dir) / "outfeats"
-    utt_list_path = Path(config.data.data_dir) / "utt.list"
-
-    # Params
-    batch_size = config.data.batch_size
+    in_feat_dir = Path(data_dir) / "infeats"
+    out_feat_dir = Path(data_dir) / "outfeats"
+    utt_list_path = Path(data_dir) / "utt.list"
 
     # Dataset
     in_feats_paths = list(in_feat_dir.glob("*-feats.npy"))
     out_feats_paths = [out_feat_dir / in_path.name for in_path in in_feats_paths]
-    dataset = NoFillerDataset(in_feats_paths, out_feats_paths, utt_list_path)
+    dataset = NoFPDataset(in_feats_paths, out_feats_paths, utt_list_path)
     data_loader = DataLoader(
         dataset,
         batch_size=batch_size,
         collate_fn=dataset.collate_fn,
         pin_memory=True,
-        num_workers=config.data.num_workers,
+        num_workers=num_workers,
         shuffle=False
     )
 
@@ -274,7 +136,6 @@ def predict_utokyo_naist_lecture(
     out_utt_text = "".join([utt.split(":")[1] for utt in out_utt_list if not utt.split(":")[1].startswith("(F)")])
     assert utt_text == out_utt_text, f"utt_text should be equal to out_utt_text\nutt_text:\n{utt_text}\n\nout_utt_text:\n{out_utt_text}"
 
-@hydra.main(config_path="predict_config", config_name="predict")
 def predict(config: DictConfig):
 
     # Phase
@@ -292,20 +153,32 @@ def predict(config: DictConfig):
     pl.seed_everything(config.random_seed)
 
     # filler list
-    filler_list_path = Path(to_absolute_path(config.data.filler_list))
-    with open(filler_list_path, "r") as f:
+    fp_list_path = Path(to_absolute_path(config.fp_list_path))
+    with open(fp_list_path, "r") as f:
         fps = [l.strip() for l in f]
 
     # Load model
     model = hydra.utils.instantiate(config.model.netG)
     pl_model = MyLightningModel.load_from_checkpoint(
-        config[phase].model_ckpt_path, model=model, strict=False)
+        config[phase].model_ckpt_path, model=model, fp_list=fps, strict=False)
 
     # Trainer
     trainer = pl.Trainer(gpus=config[phase].gpus,
                          auto_select_gpus=config[phase].auto_select_gpus)
 
-    predict_utokyo_naist_lecture(config, trainer, pl_model, out_dir, fps)
+    predict_utokyo_naist_lecture(config.data_dir, config.data.batch_size,
+                                 config.data.num_workers, trainer, pl_model,
+                                 out_dir, fps)
+
+
+@hydra.main(config_path="predict_config", config_name="predict")
+def main(config: DictConfig):
+
+    print("--- Preprocess ---")
+    preprocess(config)
+    print("--- Predict ---")
+    predict(config)
+
 
 if __name__=="__main__":
-    predict()
+    main()
