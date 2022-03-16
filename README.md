@@ -9,7 +9,7 @@ This is an open-source implementation of speech synthesis model with filled paus
 You can install the Python requirements with
 
 ```
-pip install -r requirements.txt
+$ pip install -r requirements.txt
 ```
 
 Our recommendation of the Python version is ``3.8``.
@@ -19,6 +19,11 @@ Our recommendation of the Python version is ``3.8``.
 ### BERT
 
 Install BERT model to the directory ``./bert/`` from [here](https://nlp.ist.i.kyoto-u.ac.jp/?ku_bert_japanese). We use pytorch-pretrained-BERT with LARGE WWM version.
+
+### Repository of filled pause prediction
+
+Clone the repository of filled pause prediction: [filledpause_prediction_group](https://github.com/ndkgit339/filledpause_prediction_group).
+And then, put the directory (i.e. module) ``./fp_pred_group`` on ``./filled_pause_speech_synthesis/fp_pred_group``
 
 ## Speech synthesis with filled pauses
 
@@ -31,22 +36,16 @@ First of all, prepare pre-trained filled pause prediction model and speech synth
 ### Step 1: Prediction
 
 1. First, prepare a file of the utterance list. You can see an example of that in ``./predict_preprocessed_data/example``.
-2. Next, run the script of preprocess for filled pause prediction. This follows the setting written in ``./config_predict/preprocess.yaml``. Change the setting accordingly.
+2. Next, run the script of filled pause prediction. This follows the setting written in ``./config_predict/predict.yaml``. Change the setting accordingly.
 
 ```
-python predict_preprocess.py
+$ python predict_fp.py
 ```
 
-3. Next, run the script of filled pause prediction. This follows the setting written in ``./config_predict/predict.yaml``. Change the setting accordingly.
+3. Finally, run the script of postprocess as the preparation for the next synthesis step. This follows the setting written in ``./config_predict/postprocess.yaml``. Change the setting accordingly.
 
 ```
-python predict_fp.py
-```
-
-4. Finally, run the script of postprocess as the preparation for the next synthesis step. This follows the setting written in ``./config_predict/postprocess.yaml``. Change the setting accordingly.
-
-```
-python predict_postprocess.py
+$ python predict_postprocess.py
 ```
 
 ### Step 2: Synthesis
@@ -54,13 +53,13 @@ python predict_postprocess.py
 1. First, run the script of preprocess for speech synthesis. This follows the setting written in ``./config/.../preprocess.yaml``. Set the parameter ``test`` to ``True``. Change the setting accordingly.
 
 ```
-python preprocess.py path/to/preprocess/config
+$ python preprocess.py path/to/preprocess/config
 ```
 
 2. Next, run the script of synthesis. This follows the setting written in ``./config/.../synthesize.yaml``. Change the setting accordingly.
 
 ```
-python synthesize.py path/to/synthesis/config --restore_step xxx
+$ python synthesize.py path/to/synthesis/config --restore_step xxx
 ```
 
 ## Train a speech synthesis model
@@ -94,13 +93,13 @@ python synthesize.py path/to/synthesis/config --restore_step xxx
 Run the script ``preprocess.py`` to preprocess data for the training of the speech synthesis model.
 This follows the setting written in ``config/.../preprocess.yaml``. Set the parameter ``test`` to ``False``. Change the setting accordingly.
 ```
-python preprocess.py path/to/preprocess/config
+$ python preprocess.py path/to/preprocess/config
 ```
 
 ### Step 3: Training
 Run the script ``train.py`` to train the speech synthesis model. This follows the setting written in ``config/.../preprocess.yaml``, ``config/.../model.yaml``, and ``config/.../train.yaml``. Change the setting accordingly.
 ```
-python train.py -p path/to/preprocess/config -m path/to/model/config -t path/to/train/config
+$ python train.py -p path/to/preprocess/config -m path/to/model/config -t path/to/train/config
 ```
 You can select whether you use FP tag or not in ``config/.../train.yaml``.
 ```
