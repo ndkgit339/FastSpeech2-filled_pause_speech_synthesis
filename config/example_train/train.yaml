@@ -1,7 +1,7 @@
 path:
-  ckpt_path: "./output/utokyo_lecture/speaker1_uno/ver220315/ckpt"
-  log_path: "./output/utokyo_lecture/speaker1_uno/ver220315/log"
-  result_path: "./output/utokyo_lecture/speaker1_uno/ver220315/result"
+  ckpt_path: "./output/example/speaker_A/ckpt"
+  log_path: "./output/example/speaker_A/log"
+  result_path: "./output/example/speaker_A/result"
 optimizer:
   batch_size: 16
   betas: [0.9, 0.98]
@@ -17,7 +17,7 @@ step:
   log_step: 100
   synth_step: 1000
   val_step: 1000
-  save_step: 50000
+  save_step: 10000
 dataparallel: False
 use_fp_tag: True
 fine_tune: True

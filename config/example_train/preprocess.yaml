@@ -3,8 +3,8 @@ dataset: "example"
 path:
   corpus_path: ""
   lexicon_path: ""
-  raw_path: "./raw_data/utokyo_lecture/speaker1_uno_220208"
-  preprocessed_path: "./preprocessed_data/utokyo_lecture/speaker1_uno_220208"
+  raw_path: "./raw_data/example_train/speaker_A"
+  preprocessed_path: "./preprocessed_data/example_train/speaker_A"
 
 preprocessing:
   val_size: 512

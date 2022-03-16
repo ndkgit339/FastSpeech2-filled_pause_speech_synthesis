@@ -3,8 +3,8 @@ dataset: "example"
 path:
   corpus_path: ""
   lexicon_path: ""
-  raw_path: "./raw_data/example"
-  preprocessed_path: "./preprocessed_data/example"
+  raw_path: "./raw_data/example_predsynth"
+  preprocessed_path: "./preprocessed_data/example_predsynth"
 
 preprocessing:
   val_size: 512

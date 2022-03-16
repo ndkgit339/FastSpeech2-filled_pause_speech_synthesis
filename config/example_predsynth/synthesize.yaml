@@ -1,12 +1,12 @@
 mode: batch
 target: False
-source: ./preprocessed_data/example/test.txt
+source: ./preprocessed_data/example_predsynth/test.txt
 text: 
 speaker_id: 
 
 result_path: ./output/example/result
 
-preprocess_config: ./preprocessed_data/example/preprocess.yaml
+preprocess_config: ./preprocessed_data/example_predsynth/preprocess.yaml
 model_config: 
 train_config: 
 
