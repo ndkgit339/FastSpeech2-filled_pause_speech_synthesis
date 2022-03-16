@@ -4,7 +4,7 @@ hydra:
 
 n_jobs: 8
 
-data_dir: ./predicted_data/example
+data_dir: ./predict_data/example/predicted_data
 
 target_preprocessed_dir: ./preprocessed_data/example
 target_raw_dir: ./raw_data/example
