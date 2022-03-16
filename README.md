@@ -35,7 +35,7 @@ First of all, prepare pre-trained filled pause prediction model and speech synth
 
 ### Step 1: Prediction
 
-1. First, prepare a file of the utterance list. You can see an example of that in ``./predict_preprocessed_data/example``.
+1. First, prepare a file of the utterance list. You can see an example of that in ``./predict_data/example/preprocessed_data``.
 2. Next, run the script of filled pause prediction. This follows the setting written in ``./config_predict/predict.yaml``. Change the setting accordingly.
 
 ```
