@@ -73,7 +73,7 @@ This consists of three processed: preparation, preprocessing, and training. In t
 
 ### Step 1: Preparation
 
-1. First, prepare a pretrained speech synthesis model trained on [JSUT](https://sites.google.com/site/shinnosuketakamichi/publication/jsut). A pretrained model is available at ``./output/JSUT/ckpt/600000.pth.tar``.
+1. First, prepare a pretrained speech synthesis model trained on [JSUT](https://sites.google.com/site/shinnosuketakamichi/publication/jsut). You can download a checkpoint file of a pretrained model from FastSpeech2-JSUT_600000.pth.tar(google drive link). Put the file on ``output/JSUT/ckpt/``.
 
 2. Put files of phoneme labels, accents, and filled pause tags into the directory of preprocessed data ``./preprocessed_data``, and put files of raw texts and waves into the directory of raw data ``./raw_data``. You can see an example with the required formats thre.
    
@@ -115,7 +115,7 @@ $ python train.py -p ${path to preprocess configuration file} -m ${path to model
 ```
 use_fp_tag: True or False
 ```
-- Write down the path to a checkpoint file of a pretrained model in ``config/.../train.yaml``. You can download a checkpoint file of a pretrained model from FastSpeech2-JSUT_600000.pth.tar(google drive link). Put the file on ``output/JSUT/ckpt/``.
+- Write down the path to a checkpoint file of a pretrained model in ``config/.../train.yaml``.
 ```
 fine_tune: True
 fine_tune_ckpt_path: "./output/JSUT/ckpt/FastSpeech2-JSUT_600000.pth.tar"
