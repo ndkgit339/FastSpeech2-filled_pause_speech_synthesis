@@ -73,7 +73,7 @@ This consists of three processed: preparation, preprocessing, and training. In t
 
 ### Step 1: Preparation
 
-1. First, prepare a pretrained speech synthesis model trained on [JSUT](https://sites.google.com/site/shinnosuketakamichi/publication/jsut). You can download a checkpoint file of a pretrained model from FastSpeech2-JSUT_600000.pth.tar(google drive link). Put the file on ``output/JSUT/ckpt/``.
+1. First, prepare a pretrained speech synthesis model trained on [JSUT](https://sites.google.com/site/shinnosuketakamichi/publication/jsut). You can download a checkpoint file of a pretrained model from FastSpeech2-JSUT_600000.pth.tar(google drive link). Put the file on ``./output/JSUT/ckpt/``.
 
 2. Put files of phoneme labels, accents, and filled pause tags into the directory of preprocessed data ``./preprocessed_data``, and put files of raw texts and waves into the directory of raw data ``./raw_data``. You can see an example with the required formats thre.
    
