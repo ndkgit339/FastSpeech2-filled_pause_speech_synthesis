@@ -21,4 +21,4 @@ step:
 dataparallel: False
 use_fp_tag: True
 fine_tune: True
-fine_tune_ckpt_path: "./output/JSUT/ckpt/600000.pth.tar"
+fine_tune_ckpt_path: "./output/JSUT/ckpt/FastSpeech2-JSUT_600000.pth.tar"
