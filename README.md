@@ -1,7 +1,7 @@
 # Speech synthesis with filled pauses and training scripts
 
 This is an open-source implementation of a speech synthesis model with filled pauses based on FastSpeech2. The key charasteristics are as follows:
-- [__Speech synthesis with filled pauses__](#speech-synthesis-with-filled-pauses) is a script to synthesize spontaneous speech with filled pauses from an input text without filled pauses with prepared models of filled pause prediction and speech synthesis.
+- [__Speech synthesis with filled pauses__](#speech-synthesis-with-filled-pauses) is a script to synthesize spontaneous speech with filled pauses from an input text without filled pauses using prepared models of filled pause prediction and speech synthesis.
 - __Filled pause tags__ are introduced to the speech synthesis model to synthesize natural spontaneous speech with filled pauses. You can train a speech synthesis model that deals with filled pauses.
 
 ## Project page and audio samples
@@ -69,7 +69,7 @@ $ python synthesize.py ${path to a synthesis configuration file} --restore_step 
 ## Train a speech synthesis model
 
 You can train a spontaneous speech synthesis model including filled puases by fine-tuning a pretrained speech synthesis model trained on [JSUT](https://sites.google.com/site/shinnosuketakamichi/publication/jsut). A pretrained model is available at ``./output/JSUT/ckpt/600000.pth.tar``.
-This consists of three processed: preparation, preprocessing, and training. In the training, you can use a japanese spontaneous speech corpus, [JLecSponSpeech](https://sites.google.com/g.ecc.u-tokyo.ac.jp/yuta-matsunaga/publications/spon_utokyo_lecture).
+This consists of three processed: preparation, preprocessing, and training. In the training, you can use a Japanese spontaneous speech corpus, [JLecSponSpeech](https://sites.google.com/g.ecc.u-tokyo.ac.jp/yuta-matsunaga/publications/spon_utokyo_lecture).
 
 ### Step 1: Preparation
 
