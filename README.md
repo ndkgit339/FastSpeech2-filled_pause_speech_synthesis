@@ -68,7 +68,7 @@ $ python synthesize.py ${path to a synthesis configuration file} --restore_step 
 
 ## Train a speech synthesis model
 
-You can train a spontaneous speech synthesis model including filled puases by fine-tuning a pretrained speech synthesis model trained on [JSUT](https://sites.google.com/site/shinnosuketakamichi/publication/jsut). A pretrained model is available at ``./output/JSUT/ckpt/600000.pth.tar``.
+You can train a spontaneous speech synthesis model including filled puases by fine-tuning a pretrained speech synthesis model trained on [JSUT](https://sites.google.com/site/shinnosuketakamichi/publication/jsut). A pretrained model is available from FastSpeech2-JSUT_600000.pth.tar(google drive link).
 This consists of three processed: preparation, preprocessing, and training. In the training, you can use a Japanese spontaneous speech corpus, [JLecSponSpeech](https://sites.google.com/g.ecc.u-tokyo.ac.jp/yuta-matsunaga/publications/spon_utokyo_lecture).
 
 ### Step 1: Preparation
@@ -115,10 +115,10 @@ $ python train.py -p ${path to preprocess configuration file} -m ${path to model
 ```
 use_fp_tag: True or False
 ```
-- Write down the path to a checkpoint file of a pretrained model in ``config/.../train.yaml``.
+- Write down the path to a checkpoint file of a pretrained model in ``config/.../train.yaml``. You can download a checkpoint file of a pretrained model from FastSpeech2-JSUT_600000.pth.tar(google drive link). Put the file on ``output/JSUT/ckpt/``.
 ```
 fine_tune: True
-fine_tune_ckpt_path: "./output/JSUT/ckpt/600000.pth.tar"
+fine_tune_ckpt_path: "./output/JSUT/ckpt/FastSpeech2-JSUT_600000.pth.tar"
 ```
 
 ## References
