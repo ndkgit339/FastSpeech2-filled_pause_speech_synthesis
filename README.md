@@ -6,7 +6,7 @@ This is an open-source implementation of a speech synthesis model with filled pa
 
 ## Project page and audio samples
 
-- [Empirical study incorporating linguistic knowledge on filled pauses for personalized spontaneous speech synthesis](https://sites.google.com/g.ecc.u-tokyo.ac.jp/yuta-matsunaga/publications/fp_synth_IS22)
+- Empirical study incorporating linguistic knowledge on filled pauses for personalized spontaneous speech synthesis (coming soon...)
 - Audio samples are also available there.
 
 ## Requirements
