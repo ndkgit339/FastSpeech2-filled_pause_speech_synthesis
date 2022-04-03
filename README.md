@@ -25,7 +25,7 @@ Our recommendation of the Python version is ``3.8``.
 
 Install BERT model to the directory ``./bert/`` from [here](https://nlp.ist.i.kyoto-u.ac.jp/?ku_bert_japanese). We use pytorch-pretrained-BERT with LARGE WWM version.
 
-### Repository of filled pause prediction
+### repository of filled pause prediction
 
 Clone the repository of filled pause prediction ([filledpause_prediction_group](https://github.com/ndkgit339/filledpause_prediction_group)).
 
@@ -33,11 +33,11 @@ Clone the repository of filled pause prediction ([filledpause_prediction_group](
 
 You can synthesize spontaneous speech with filled pauses from an input text without filled pauses with prepared models of filled pause prediction and speech synthesis. This consists of two processes: filled pause prediction and speech synthesis.
 
-### Step 0: Preparation of pre-trained models
+### step 0: preparation of pre-trained models
 
 First of all, prepare pre-trained filled pause prediction model and speech synthesis model. You can train a prediction model in [filledpause_prediction_group](https://github.com/ndkgit339/filledpause_prediction_group) and a speech synthesis model with the script described below. Write down tha path to the checkpoint file of the prediction model on ``./predict_config/predict.yaml``. Then, write down paths to configuration files (``model.yaml`` and ``train.yaml``) of the training of the synthesis model on ``./config/.../synthesize.yaml``. 
 
-### Step 1: Prediction
+### step 1: filled pause prediction
 
 1. First, prepare a file of the utterance list. You can see an example of that in ``./predict_data/example/preprocessed_data``.
 2. Next, run the script of filled pause prediction. This follows the setting written in ``./config_predict/predict.yaml``. Change the setting accordingly.
@@ -52,7 +52,7 @@ $ python predict_fp.py
 $ python predict_postprocess.py
 ```
 
-### Step 2: Synthesis
+### step 2: text-to-speech synthesis
 
 1. First, run the script of preprocess for speech synthesis. This follows the setting written in ``./config/.../preprocess.yaml``. Set the parameter ``test`` to ``True``. Change the setting accordingly.
 
@@ -68,12 +68,12 @@ $ python synthesize.py ${path to a synthesis configuration file} --restore_step 
 
 ## Train a speech synthesis model
 
-You can train a spontaneous speech synthesis model including filled puases by fine-tuning a pretrained speech synthesis model trained on [JSUT](https://sites.google.com/site/shinnosuketakamichi/publication/jsut). A pretrained model is available from FastSpeech2-JSUT_600000.pth.tar(google drive link).
+You can train a spontaneous speech synthesis model including filled puases by fine-tuning a pretrained speech synthesis model trained on [JSUT](https://sites.google.com/site/shinnosuketakamichi/publication/jsut). A pretrained model is available from [FastSpeech2-JSUT_600000.pth.tar](https://drive.google.com/uc?export=download&id=1lNMFR6gnv5ApkYIc7DkYMuK98AB8zI7F). You can use this model __only for research for non-commercial purposes__.
 This consists of three processed: preparation, preprocessing, and training. In the training, you can use a Japanese spontaneous speech corpus, [JLecSponSpeech](https://sites.google.com/g.ecc.u-tokyo.ac.jp/yuta-matsunaga/publications/spon_utokyo_lecture).
 
-### Step 1: Preparation
+### step 1: preparation
 
-1. First, prepare a pretrained speech synthesis model trained on [JSUT](https://sites.google.com/site/shinnosuketakamichi/publication/jsut). You can download a checkpoint file of a pretrained model from FastSpeech2-JSUT_600000.pth.tar(google drive link). Put the file on ``./output/JSUT/ckpt/``.
+1. First, prepare a pretrained speech synthesis model trained on [JSUT](https://sites.google.com/site/shinnosuketakamichi/publication/jsut). You can download a checkpoint file of a pretrained model from [FastSpeech2-JSUT_600000.pth.tar](https://drive.google.com/uc?export=download&id=1lNMFR6gnv5ApkYIc7DkYMuK98AB8zI7F). You can use this model __only for research for non-commercial purposes__. Put the file on ``./output/JSUT/ckpt/``.
 
 2. Put files of phoneme labels, accents, and filled pause tags into the directory of preprocessed data ``./preprocessed_data``, and put files of raw texts and waves into the directory of raw data ``./raw_data``. You can see an example with the required formats thre.
    
@@ -98,14 +98,14 @@ This consists of three processed: preparation, preprocessing, and training. In t
 |         └--- xxx.lab
 ```
 
-### Step 2: Preprocess
+### step 2: preprocess
 Run the script ``preprocess.py`` to preprocess data for the training of the speech synthesis model.
 - This follows the setting written in ``config/.../preprocess.yaml``. Set the parameter ``test`` to ``False``. Change the setting accordingly.
 ```
 $ python preprocess.py path/to/preprocess/config
 ```
 
-### Step 3: Training
+### step 3: training
 Run the script ``train.py`` to train the speech synthesis model. You can use [JLecSponSpeech](https://sites.google.com/g.ecc.u-tokyo.ac.jp/yuta-matsunaga/publications/spon_utokyo_lecture).
 - This follows the setting written in ``config/.../preprocess.yaml``, ``config/.../model.yaml``, and ``config/.../train.yaml``. Change the setting accordingly.
 ```
