@@ -21,7 +21,7 @@ Our recommendation of the Python version is ``3.8``.
 
 ## Speech synthesis with filled pauses
 
-You can synthesize spontaneous speech with filled pauses from an input text without filled pauses with prepared models of filled pause prediction and speech synthesis. This consists of two processes: filled pause prediction and speech synthesis.
+You can synthesize spontaneous speech with filled pauses from an input text without filled pauses with prepared models of filled pause prediction and speech synthesis. This consists of two steps: filled pause prediction and text-to-speech synthesis.
 
 ### step 0: preparation of pretrained models and a repository
 
@@ -62,8 +62,7 @@ $ python synthesize.py ${path to a synthesis configuration file} --restore_step 
 
 ## Train a speech synthesis model
 
-You can train a spontaneous speech synthesis model including filled puases by fine-tuning a pretrained speech synthesis model trained on [JSUT](https://sites.google.com/site/shinnosuketakamichi/publication/jsut). A pretrained model is available from [FastSpeech2-JSUT_600000.pth.tar](https://drive.google.com/uc?export=download&id=1lNMFR6gnv5ApkYIc7DkYMuK98AB8zI7F). You can use this model __only for research for non-commercial purposes__.
-This consists of three processed: preparation, preprocessing, and training. In the training, you can use a Japanese spontaneous speech corpus, [JLecSponSpeech](https://sites.google.com/g.ecc.u-tokyo.ac.jp/yuta-matsunaga/publications/spon_utokyo_lecture).
+You can train a spontaneous speech synthesis model including filled puases by fine-tuning a pretrained speech synthesis model trained on [JSUT](https://sites.google.com/site/shinnosuketakamichi/publication/jsut). This consists of three steps: preparation, preprocessing, and training.
 
 ### step 1: preparation
 
@@ -100,7 +99,7 @@ $ python preprocess.py path/to/preprocess/config
 ```
 
 ### step 3: training
-Run the script ``train.py`` to train the speech synthesis model. You can use [JLecSponSpeech](https://sites.google.com/g.ecc.u-tokyo.ac.jp/yuta-matsunaga/publications/spon_utokyo_lecture).
+Run the script ``train.py`` to train the speech synthesis model. You can use a Japanese spontaneous speech corpus, [JLecSponSpeech](https://sites.google.com/g.ecc.u-tokyo.ac.jp/yuta-matsunaga/publications/spon_utokyo_lecture).
 - This follows the setting written in ``config/.../preprocess.yaml``, ``config/.../model.yaml``, and ``config/.../train.yaml``. Change the setting accordingly.
 ```
 $ python train.py -p ${path to preprocess configuration file} -m ${path to model configuration file} -t ${path to training configuration file}
