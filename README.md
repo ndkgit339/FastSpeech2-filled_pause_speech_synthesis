@@ -26,9 +26,9 @@ You can synthesize spontaneous speech with filled pauses from an input text with
 ### step 0: preparation of pretrained models and a repository
 
 1. Prepare pre-trained filled pause prediction model and speech synthesis model.
-- Install a pretrained BERT to the directory ``./bert/`` from [here](https://nlp.ist.i.kyoto-u.ac.jp/?ku_bert_japanese). We use pytorch-pretrained-BERT with LARGE WWM version.
-- You can train a prediction model in [filledpause_prediction_group](https://github.com/ndkgit339/filledpause_prediction_group). Write down the path to the checkpoint file of the prediction model on ``./predict_config/predict.yaml``.
-- You can train a speech synthesis model with the script described below. Write down paths to configuration files (``model.yaml`` and ``train.yaml``) of the training of the synthesis model on ``./config/.../synthesize.yaml``.
+    - Install a pretrained BERT to the directory ``./bert/`` from [here](https://nlp.ist.i.kyoto-u.ac.jp/?ku_bert_japanese). We use pytorch-pretrained-BERT with LARGE WWM version.
+    - You can train a prediction model in [filledpause_prediction_group](https://github.com/ndkgit339/filledpause_prediction_group). Write down the path to the checkpoint file of the prediction model on ``./predict_config/predict.yaml``.
+    - You can train a speech synthesis model with the script described below. Write down paths to configuration files (``model.yaml`` and ``train.yaml``) of the training of the synthesis model on ``./config/.../synthesize.yaml``.
 2. Clone the repository of filled pause prediction ([filledpause_prediction_group](https://github.com/ndkgit339/filledpause_prediction_group)).
 
 ### step 1: filled pause prediction
